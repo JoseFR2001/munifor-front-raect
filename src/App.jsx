@@ -1,5 +1,9 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
+//Layouts:
+
+import GeneralLayout from "./layout/GeneralLayout";
+
 //Pages:
 
 // General
@@ -21,10 +25,12 @@ const App = () => {
     <BrowserRouter>
       <Routes>
         {/* General */}
-        <Route path="/" element={<Home />} />
-        <Route path="/register" element={<CitizenRegister />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgotpassword" element={<ForgotPassword />} />
+        <Route element={<GeneralLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/register" element={<CitizenRegister />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgotpassword" element={<ForgotPassword />} />
+        </Route>
         {/* Ciudadano */}
         {/* Trabajador */}
         {/* Operador */}
