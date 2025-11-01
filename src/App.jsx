@@ -13,6 +13,12 @@ import Login from "./pages/General/Login";
 import ForgotPassword from "./pages/General/ForgotPassword";
 
 //Ciudadano
+import CitizenLayout from "./layout/CitizenLayout";
+import CitizenDashboard from "./pages/Citizen/CitizenDashboard";
+import CitizenProfile from "./pages/Citizen/CitizenProfile";
+import CitizenReports from "./pages/Citizen/CitizenReports";
+import Contact from "./pages/Citizen/Contact";
+import ReportStatus from "./pages/Citizen/ReportStatus";
 
 //Trabajador
 
@@ -39,6 +45,13 @@ const App = () => {
         <Route path="/updatepassword" element={<UpdatePassword />} />
 
         {/* Ciudadano */}
+        <Route element={<CitizenLayout />}>
+          <Route path="/citizen/dashboard" element={<CitizenDashboard />} />
+          <Route path="/citizen/profile" element={<CitizenProfile />} />
+          <Route path="/citizen/reports" element={<CitizenReports />} />
+          <Route path="/citizen/contact" element={<Contact />} />
+          <Route path="/citizen/reportstatus" element={<ReportStatus />} />
+        </Route>
         {/* Trabajador */}
         {/* Operador */}
         {/* Administrador */}
