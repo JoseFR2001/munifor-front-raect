@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const registerSchema = z
+const registerSchema = z
   .object({
     username: z
       .string()
@@ -45,8 +45,9 @@ export const registerSchema = z
 
     dni: z.string().regex(/^\d{8}$/, "El DNI debe tener 8 dígitos"),
 
-    sexo: z.enum(["", "hombre", "mujer", "otro"])
-      .refine(val => val !== "", { message: "Debes seleccionar tu sexo" }),
+    sexo: z
+      .enum(["", "hombre", "mujer", "otro"])
+      .refine((val) => val !== "", { message: "Debes seleccionar tu sexo" }),
 
     phone: z.string().regex(/^\d{10}$/, "El teléfono debe tener 10 dígitos"),
   })
@@ -54,3 +55,5 @@ export const registerSchema = z
     message: "Las contraseñas no coinciden",
     path: ["confirmpassword"],
   });
+
+export default registerSchema;

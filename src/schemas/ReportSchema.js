@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const reportSchema = z.object({
+const reportSchema = z.object({
   title: z
     .string()
     .min(5, "El título debe tener al menos 5 caracteres")
@@ -45,3 +45,5 @@ export const reportSchema = z.object({
       return validTypes.includes(file.type);
     }, "Solo se aceptan imágenes JPG, PNG o WEBP"),
 });
+
+export default reportSchema;

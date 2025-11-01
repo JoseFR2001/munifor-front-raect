@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const taskSchema = z.object({
+const taskSchema = z.object({
   equipo: z
     .string()
     .min(1, "Debes asignar un equipo")
@@ -9,3 +9,5 @@ export const taskSchema = z.object({
       "ID de equipo inválido (debe ser ObjectId de MongoDB)"
     ),
 });
+
+export default taskSchema;

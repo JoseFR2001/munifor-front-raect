@@ -1,18 +1,21 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { registerSchema } from "../schemas/RegisterSchema";
+import registerSchema from "../schemas/RegisterSchema.js";
 
 const FormRegister = () => {
+  //Funciones para manejar el formulario
   const { register, handleSubmit, formState } = useForm({
     resolver: zodResolver(registerSchema),
     mode: "onChange",
   });
 
+  //Manejo de errores
   const { errors } = formState;
 
+  //Aquí se maneja que va al servidor
   const onSubmit = (data) => {
-    console.log(data);
+    console.log({ ...data, role: "Admin" });
     console.log(typeof data.age);
   };
 

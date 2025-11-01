@@ -20,6 +20,9 @@ import ForgotPassword from "./pages/General/ForgotPassword";
 
 //Administrador
 
+//Actualización de contraseña
+import UpdatePassword from "./pages/General/UpdatePassword";
+
 const App = () => {
   return (
     <BrowserRouter>
@@ -31,6 +34,10 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
         </Route>
+
+        {/* Actualizar contraseña */}
+        <Route path="/updatepassword" element={<UpdatePassword />} />
+
         {/* Ciudadano */}
         {/* Trabajador */}
         {/* Operador */}

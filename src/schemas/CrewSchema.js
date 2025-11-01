@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const crewSchema = z.object({
+const crewSchema = z.object({
   nombre: z
     .string()
     .min(3, "El nombre del equipo debe tener al menos 3 caracteres")
@@ -20,3 +20,5 @@ export const crewSchema = z.object({
     return ids.every((id) => /^[a-f0-9]{24}$/.test(id));
   }, "Todos los IDs deben ser válidos (ObjectId de MongoDB)"),
 });
+
+export default crewSchema;
