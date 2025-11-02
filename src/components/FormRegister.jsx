@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import registerSchema from "../schemas/RegisterSchema.js";
 
-const FormRegister = () => {
+const FormRegister = ({ role }) => {
   //Funciones para manejar el formulario
   const { register, handleSubmit, formState } = useForm({
     resolver: zodResolver(registerSchema),
@@ -21,7 +21,7 @@ const FormRegister = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <h1>Registrate</h1>
+      <h1>Registrate como {role}</h1>
 
       <div>
         <label htmlFor="username">Username</label>

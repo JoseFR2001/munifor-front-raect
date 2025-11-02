@@ -1,0 +1,29 @@
+import { Link } from "react-router-dom";
+import NavBarMenu from "./NavBarMenu";
+
+const AdminNavBar = () => {
+  return (
+    <nav className="flex items-center justify-between border p-1 mb-4">
+      <ul className="flex gap-4">
+        <li>
+          <Link to="/admin/dashboard" className="border rounded">
+            Dashboard
+          </Link>
+        </li>
+        <li>
+          <Link to="/admin/statistics" className="border rounded">
+            Estadísticas
+          </Link>
+        </li>
+        <li>
+          <Link to="/admin/map" className="border rounded">
+            Mapa
+          </Link>
+        </li>
+      </ul>
+
+      <NavBarMenu />
+    </nav>
+  );
+};
+export default AdminNavBar;

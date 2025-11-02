@@ -1,12 +1,12 @@
 import { Outlet } from "react-router-dom";
+import AdminNavBar from "../components/navbars/AdminNavBar";
 import Footer from "../components/Footer";
-import GeneralNavBar from "../components/navbars/GeneralNavBar";
 
-const GeneralLayout = () => {
+const AdminLayout = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <header>
-        <GeneralNavBar />
+        <AdminNavBar />
       </header>
       <main className="flex-1">
         <Outlet />
@@ -15,5 +15,4 @@ const GeneralLayout = () => {
     </div>
   );
 };
-
-export default GeneralLayout;
+export default AdminLayout;

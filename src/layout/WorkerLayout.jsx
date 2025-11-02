@@ -1,12 +1,12 @@
 import { Outlet } from "react-router-dom";
+import WorkerNavBar from "../components/navbars/WorkerNavBar";
 import Footer from "../components/Footer";
-import GeneralNavBar from "../components/navbars/GeneralNavBar";
 
-const GeneralLayout = () => {
+const WorkerLayout = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <header>
-        <GeneralNavBar />
+        <WorkerNavBar />
       </header>
       <main className="flex-1">
         <Outlet />
@@ -15,5 +15,4 @@ const GeneralLayout = () => {
     </div>
   );
 };
-
-export default GeneralLayout;
+export default WorkerLayout;

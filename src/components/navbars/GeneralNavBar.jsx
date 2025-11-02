@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-const NavBar = () => {
+const GeneralNavBar = () => {
   return (
     <nav className="flex items-center justify-between border p-1">
       <ul className="flex gap-4">
@@ -31,4 +31,4 @@ const NavBar = () => {
     </nav>
   );
 };
-export default NavBar;
+export default GeneralNavBar;
