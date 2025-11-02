@@ -14,11 +14,11 @@ import Contact from "./pages/Citizen/Contact";
 import ReportStatus from "./pages/Citizen/ReportStatus";
 
 //Trabajador
-import WorkerDashboard from "./pages/worker/WorkerDashboard";
-import WorkerHistory from "./pages/worker/WorkerHistory";
-import WorkerProgress from "./pages/worker/WorkerProgress";
-import WorkerTasks from "./pages/worker/WorkerTasks";
-import WorkerTeam from "./pages/worker/WorkerTeam";
+import WorkerDashboard from "./pages/Worker/WorkerDashboard";
+import WorkerHistory from "./pages/Worker/WorkerHistory";
+import WorkerProgress from "./pages/Worker/WorkerProgress";
+import WorkerTasks from "./pages/Worker/WorkerTasks";
+import WorkerTeam from "./pages/Worker/WorkerTeam";
 
 //Operador
 import OperatorDashboard from "./pages/Operator/OperatorDashboard";
@@ -36,7 +36,7 @@ import AdminMap from "./pages/Admin/AdminMap";
 
 //Registros
 import OperatorRegister from "./pages/Operator/OperatorRegister";
-import WorkerRegister from "./pages/worker/WorkerRegister";
+import WorkerRegister from "./pages/Worker/WorkerRegister";
 import AdminRegister from "./pages/Admin/AdminRegister";
 
 //Actualización de contraseña

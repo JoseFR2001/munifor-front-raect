@@ -45,8 +45,8 @@ const registerSchema = z
 
     dni: z.string().regex(/^\d{8}$/, "El DNI debe tener 8 dígitos"),
 
-    sexo: z
-      .enum(["", "hombre", "mujer", "otro"])
+    sex: z
+      .enum(["", "Hombre", "Mujer", "Otro"])
       .refine((val) => val !== "", { message: "Debes seleccionar tu sexo" }),
 
     phone: z.string().regex(/^\d{10}$/, "El teléfono debe tener 10 dígitos"),

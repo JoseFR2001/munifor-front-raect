@@ -1,13 +1,22 @@
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import CitizenLeafletMap from "../../components/LeafletMaps/CitizenLeafletMap";
+import reportSchema from "../../schemas/ReportSchema.js";
 import { useState } from "react";
 
 const CitizenReports = () => {
-  const { register, handleSubmit, formState } = useForm();
+  const { register, handleSubmit, formState, watch } = useForm({
+    resolver: zodResolver(reportSchema),
+    mode: "onChange",
+  });
   const { errors } = formState;
   const [markerPosition, setMarkerPosition] = useState(null);
 
   const onSubmit = (data) => {
+    if (!markerPosition) {
+      alert("Por favor, selecciona una ubicación en el mapa");
+      return;
+    }
     console.log({ ...data, markerPosition });
   };
 
@@ -26,6 +35,9 @@ const CitizenReports = () => {
           id="title"
           className="border"
         />
+        {errors.title && (
+          <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+        )}
       </div>
       <div>
         <label htmlFor="description">Descripcion</label>
@@ -35,6 +47,46 @@ const CitizenReports = () => {
           id="description"
           className="border"
         />
+        {errors.description && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.description.message}
+          </p>
+        )}
+      </div>
+      <div>
+        <label htmlFor="type_report">Tipo de reporte</label>
+        <select
+          id="type_report"
+          {...register("type_report")}
+          className="border"
+        >
+          <option value="">Seleccione</option>
+          <option value="Bache">Bache</option>
+          <option value="Alumbrado">Alumbrado</option>
+          <option value="Basura">Basura</option>
+          <option value="Incidente">Incidente</option>
+          <option value="Otro">Otro</option>
+        </select>
+        {errors.type_report && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.type_report.message}
+          </p>
+        )}
+        {watch("type_report") === "Otro" && (
+          <div>
+            <label htmlFor="other_type_detail">Especifique</label>
+            <input
+              type="text"
+              {...register("other_type_detail")}
+              className="border"
+            />
+            {errors.other_type_detail && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.other_type_detail.message}
+              </p>
+            )}
+          </div>
+        )}
       </div>
       <div>
         <label htmlFor="image">Imagen</label>
@@ -43,7 +95,11 @@ const CitizenReports = () => {
           {...register("image")}
           id="image"
           className="border"
+          accept="image/*"
         />
+        {errors.image && (
+          <p className="text-red-500 text-sm mt-1">{errors.image.message}</p>
+        )}
       </div>
       <div>
         <CitizenLeafletMap onMarkerChange={handleMarkerChange} />

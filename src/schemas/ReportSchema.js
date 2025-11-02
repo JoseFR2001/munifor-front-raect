@@ -1,49 +1,40 @@
 import z from "zod";
 
-const reportSchema = z.object({
-  title: z
-    .string()
-    .min(5, "El título debe tener al menos 5 caracteres")
-    .max(100, "El título no puede tener más de 100 caracteres"),
+const reportSchema = z
+  .object({
+    title: z
+      .string()
+      .min(1, "El título es requerido")
+      .min(5, "El título debe tener al menos 5 caracteres")
+      .max(100, "El título no puede exceder 100 caracteres"),
 
-  description: z
-    .string()
-    .min(10, "La descripción debe tener al menos 10 caracteres")
-    .max(500, "La descripción no puede tener más de 500 caracteres"),
+    description: z
+      .string()
+      .min(1, "La descripción es requerida")
+      .min(10, "La descripción debe tener al menos 10 caracteres")
+      .max(500, "La descripción no puede exceder 500 caracteres"),
 
-  priority: z
-    .string()
-    .refine(
-      (val) => ["Baja", "Media", "Alta"].includes(val),
-      "Prioridad no válida"
-    ),
+    type_report: z.string().min(1, "Debe seleccionar un tipo de reporte"),
 
-  type_report: z.string().min(1, "Debes seleccionar un tipo de reporte"),
+    other_type_detail: z.string().optional(),
 
-  location: z
-    .object({
-      lat: z.number(),
-      lng: z.number(),
-    })
-    .nullable()
-    .refine(
-      (val) => val !== null,
-      "Debes seleccionar una ubicación en el mapa"
-    ),
-
-  image: z
-    .any()
-    .nullable()
-    .refine((file) => {
-      if (!file) return true; // Imagen es opcional
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      return file.size <= maxSize;
-    }, "La imagen no debe superar los 5MB")
-    .refine((file) => {
-      if (!file) return true;
-      const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
-      return validTypes.includes(file.type);
-    }, "Solo se aceptan imágenes JPG, PNG o WEBP"),
-});
+    image: z.any().optional(),
+  })
+  .refine(
+    (data) => {
+      // Si type_report es "Otro", other_type_detail es requerido
+      if (
+        data.type_report === "Otro" &&
+        (!data.other_type_detail || data.other_type_detail.trim().length === 0)
+      ) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Debe especificar el tipo de reporte",
+      path: ["other_type_detail"], // Esto hace que el error aparezca en el campo other_type_detail
+    }
+  );
 
 export default reportSchema;

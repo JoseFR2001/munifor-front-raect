@@ -156,21 +156,21 @@ const FormRegister = ({ role }) => {
       </div>
 
       <div>
-        <select {...register("sexo")} defaultValue="">
+        <select {...register("sex")} defaultValue="">
           <option value="" disabled>
             Seleccione
           </option>
-          <option value="hombre">Hombre</option>
-          <option value="mujer">Mujer</option>
-          <option value="otro">Otro</option>
+          <option value="Hombre">Hombre</option>
+          <option value="Mujer">Mujer</option>
+          <option value="Otro">Otro</option>
         </select>
-        {errors.sexo && (
-          <span className="text-red-500 text-sm">{errors.sexo.message}</span>
+        {errors.sex && (
+          <span className="text-red-500 text-sm">{errors.sex.message}</span>
         )}
       </div>
 
       <div>
-        <button type="submit">Regitrate</button>
+        <button type="submit">Registrar</button>
         <p>
           Ya tienes una cuenta? <Link to="/login">Inicia sesión</Link>
         </p>
