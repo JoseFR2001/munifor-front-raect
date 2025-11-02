@@ -1,9 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import registerSchema from "../schemas/RegisterSchema.js";
+import useFetch from "../hooks/useFetch.js";
 
 const FormRegister = ({ role }) => {
+  const { postFetch } = useFetch();
+  const navigate = useNavigate();
   //Funciones para manejar el formulario
   const { register, handleSubmit, formState } = useForm({
     resolver: zodResolver(registerSchema),
@@ -15,8 +18,11 @@ const FormRegister = ({ role }) => {
 
   //Aquí se maneja que va al servidor
   const onSubmit = (data) => {
-    console.log({ ...data, role: "Admin" });
-    console.log(typeof data.age);
+    const { first_name, last_name, age, dni, phone, address, sex, ...rest } =
+      data;
+    const profile = { first_name, last_name, age, dni, phone, address, sex };
+    postFetch("/auth/register", { ...rest, role, profile });
+    navigate("/login");
   };
 
   return (

@@ -1,4 +1,5 @@
 const useFetch = () => {
+  const hostPort = "http://localhost:3000/api";
   // GET con token y soporte para AbortController
   const getFetchData = async (url) => {
     const token = localStorage.getItem("token");
@@ -7,15 +8,15 @@ const useFetch = () => {
       return;
     }
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${hostPort}${url}`, {
         headers: {
           authorization: `Bearer ${token}`,
         },
       });
-      if (!response.ok) {
-        throw new Error("Error de red o respuesta no válida");
-      }
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.msg || "Error de red o respuesta no válida");
+      }
       return data;
     } catch (error) {
       console.error("Error al obtener los datos:", error);
@@ -30,15 +31,15 @@ const useFetch = () => {
       return;
     }
     try {
-      const response = await fetch(`${url}/${id}`, {
+      const response = await fetch(`${hostPort}${url}/${id}`, {
         headers: {
           authorization: `Bearer ${token}`,
         },
       });
-      if (!response.ok) {
-        throw new Error("Error de red o respuesta no válida");
-      }
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.msg || "Error de red o respuesta no válida");
+      }
       return data;
     } catch (error) {
       console.error("Error al obtener los datos:", error);
@@ -49,17 +50,18 @@ const useFetch = () => {
   // POST JSON
   const postFetch = async (url, payload) => {
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${hostPort}${url}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) {
-        throw new Error("Error de red o respuesta no válida");
-      }
       const data = await response.json();
+      console.log(data);
+      if (!response.ok) {
+        throw new Error(data?.msg || "Error de red o respuesta no válida");
+      }
       return data;
     } catch (error) {
       console.error("Error al enviar datos:", error);
@@ -75,7 +77,7 @@ const useFetch = () => {
       return;
     }
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${hostPort}${url}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -83,10 +85,10 @@ const useFetch = () => {
         },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) {
-        throw new Error("Error de red o respuesta no válida");
-      }
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.msg || "Error de red o respuesta no válida");
+      }
       return data;
     } catch (error) {
       console.error("Error al enviar datos:", error);
@@ -95,14 +97,14 @@ const useFetch = () => {
   };
 
   // PUT JSON con token
-  const putFetch = async (url, payload) => {
+  const putFetch = async (url, id, payload) => {
     const token = localStorage.getItem("token");
     if (!token) {
       window.location.replace("/login");
       return;
     }
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${hostPort}${url}/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -110,10 +112,10 @@ const useFetch = () => {
         },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) {
-        throw new Error("Error de red o respuesta no válida");
-      }
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.msg || "Error de red o respuesta no válida");
+      }
       return data;
     } catch (error) {
       console.error("Error al actualizar datos:", error);
@@ -129,7 +131,7 @@ const useFetch = () => {
       return;
     }
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${hostPort}${url}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -137,10 +139,12 @@ const useFetch = () => {
         },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) {
-        throw new Error("Error de red o respuesta no válida");
-      }
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          data?.msg || data?.message || "Error de red o respuesta no válida"
+        );
+      }
       return data;
     } catch (error) {
       console.error("Error al modificar datos:", error);
@@ -149,23 +153,23 @@ const useFetch = () => {
   };
 
   // DELETE con token
-  const deleteFetch = async (url) => {
+  const deleteFetch = async (url, id) => {
     const token = localStorage.getItem("token");
     if (!token) {
       window.location.replace("/login");
       return;
     }
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${hostPort}${url}/${id}`, {
         method: "DELETE",
         headers: {
           authorization: `Bearer ${token}`,
         },
       });
-      if (!response.ok) {
-        throw new Error("Error de red o respuesta no válida");
-      }
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.msg || "Error de red o respuesta no válida");
+      }
       return data;
     } catch (error) {
       console.error("Error al eliminar datos:", error);
