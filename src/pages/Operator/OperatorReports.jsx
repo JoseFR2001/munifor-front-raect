@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
+import ReportModal from "../../components/ReportModal";
 
 const OperatorReports = () => {
   const { getFetchData } = useFetch();
   const [reports, setReports] = useState([]);
+  const [selectedReport, setSelectedReport] = useState(null);
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -17,6 +19,8 @@ const OperatorReports = () => {
     };
     fetchReports();
   }, []);
+
+  const closeModal = () => setSelectedReport(null);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -34,28 +38,35 @@ const OperatorReports = () => {
           reports.map((reporte, idx) => (
             <div
               key={idx}
-              className="bg-white rounded-lg shadow p-3 flex justify-between items-center border border-gray-200 w-full max-w-2xl mx-auto min-h-14"
+              className="bg-white rounded-lg shadow p-3 flex justify-between items-center border border-gray-200 w-full max-w-2xl mx-auto min-h-14 hover:cursor-pointer"
+              onClick={() => setSelectedReport(reporte)}
             >
               <div>
                 <span className="block text-xl font-semibold text-gray-800">
                   {reporte.title}
                 </span>
+                <span className="block text-sm text-gray-500">
+                  Autor: {reporte.author}
+                </span>
               </div>
               <span
                 className={`px-5 py-2 rounded-full text-base font-medium 
-									${
+                  ${
                     reporte.status === "Resuelto"
                       ? "bg-green-100 text-green-700"
                       : reporte.status === "En proceso"
                       ? "bg-yellow-100 text-yellow-700"
                       : "bg-red-100 text-red-700"
                   }
-								`}
+                `}
               >
                 {reporte.status}
               </span>
             </div>
           ))
+        )}
+        {selectedReport && (
+          <ReportModal report={selectedReport} closeModal={closeModal} />
         )}
       </div>
     </div>

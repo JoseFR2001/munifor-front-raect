@@ -1,11 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../../context/UserContext";
 import useFetch from "../../hooks/useFetch";
+import ReportModal from "../../components/ReportModal";
 
 const ReportStatus = () => {
   const { user } = useContext(UserContext);
   const { getByIdFetch } = useFetch();
   const [reports, setReports] = useState([]);
+  const [selectedReport, setSelectedReport] = useState(null);
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -19,6 +21,11 @@ const ReportStatus = () => {
     };
     fetchReports();
   }, [user]);
+
+  const closeModal = () => {
+    setSelectedReport(null);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -36,7 +43,8 @@ const ReportStatus = () => {
           reports.map((reporte, idx) => (
             <div
               key={idx}
-              className="bg-white rounded-lg shadow p-3 flex justify-between items-center border border-gray-200 w-full max-w-2xl mx-auto min-h-14"
+              className="bg-white rounded-lg shadow p-3 flex justify-between items-center border border-gray-200 w-full max-w-2xl mx-auto min-h-14 hover:cursor-pointer"
+              onClick={() => setSelectedReport(reporte)}
             >
               <div>
                 <span className="block text-xl font-semibold text-gray-800">
@@ -58,6 +66,9 @@ const ReportStatus = () => {
               </span>
             </div>
           ))
+        )}
+        {selectedReport && (
+          <ReportModal report={selectedReport} closeModal={closeModal} />
         )}
       </div>
     </div>
