@@ -20,6 +20,7 @@ import WorkerHistory from "./pages/Worker/WorkerHistory";
 import WorkerProgress from "./pages/Worker/WorkerProgress";
 import WorkerTasks from "./pages/Worker/WorkerTasks";
 import WorkerTeam from "./pages/Worker/WorkerTeam";
+import WorkerProfile from "./pages/Worker/WorkerProfile";
 
 //Operador
 import OperatorDashboard from "./pages/Operator/OperatorDashboard";
@@ -29,6 +30,7 @@ import OperatorTeams from "./pages/Operator/OperatorTeams";
 import OperatorWorkerProgress from "./pages/Operator/OperatorWorkerProgress";
 import OperatorMap from "./pages/Operator/OperatorMap";
 import OperatorStatistics from "./pages/Operator/OperatorStatistics";
+import OperatorProfile from "./pages/Operator/OperatorProfile";
 
 //Administrador
 import AdminDashboard from "./pages/Admin/AdminDashboard";
@@ -36,6 +38,7 @@ import AdminStatistics from "./pages/Admin/AdminStatistics";
 import AdminMap from "./pages/Admin/AdminMap";
 import RegistrationRequests from "./pages/Admin/RegistrationRequests";
 import AdminProfileSearch from "./pages/Admin/AdminProfileSearch";
+import AdminProfile from "./pages/Admin/AdminProfile";
 
 //Registros
 import OperatorRegister from "./pages/Operator/OperatorRegister";
@@ -81,6 +84,7 @@ const App = () => {
             <Route path="/worker/progress" element={<WorkerProgress />} />
             <Route path="/worker/tasks" element={<WorkerTasks />} />
             <Route path="/worker/team" element={<WorkerTeam />} />
+            <Route path="/worker/profile" element={<WorkerProfile />} />
           </Route>
 
           {/* Operador */}
@@ -89,6 +93,7 @@ const App = () => {
             <Route path="/operator/reports" element={<OperatorReports />} />
             <Route path="/operator/tasks" element={<OperatorTasks />} />
             <Route path="/operator/teams" element={<OperatorTeams />} />
+            <Route path="/operator/profile" element={<OperatorProfile />} />
             <Route
               path="/operator/worker-progress"
               element={<OperatorWorkerProgress />}
@@ -113,6 +118,7 @@ const App = () => {
               path="/admin/profilesearch"
               element={<AdminProfileSearch />}
             />
+            <Route path="/admin/profile" element={<AdminProfile />} />
           </Route>
 
           {/* Actualizar contraseña */}

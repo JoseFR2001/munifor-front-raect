@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../../context/UserContext";
 import useFetch from "../../hooks/useFetch";
 import ReportModal from "../../components/ReportModal";
+import { Link } from "react-router-dom";
 
 const ReportStatus = () => {
   const { user } = useContext(UserContext);
@@ -12,6 +13,7 @@ const ReportStatus = () => {
   useEffect(() => {
     const fetchReports = async () => {
       try {
+        // ! Debo modificar para que el back-end se encargue de obtener los reportes del usuario logueado
         const data = await getByIdFetch("/reports/author", user._id);
         setReports(data.reports);
         console.log("Reportes obtenidos:", data.reports);
@@ -35,9 +37,9 @@ const ReportStatus = () => {
         {reports.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16">
             <h3>¡Haz tu primer reporte!</h3>
-            <a href="/citizen/reports" className="border">
+            <Link to="/citizen/reports" className="border">
               Hacer reporte
-            </a>
+            </Link>
           </div>
         ) : (
           reports.map((reporte, idx) => (
@@ -68,6 +70,7 @@ const ReportStatus = () => {
           ))
         )}
         {selectedReport && (
+          // ! Debo mejorar el modal
           <ReportModal report={selectedReport} closeModal={closeModal} />
         )}
       </div>

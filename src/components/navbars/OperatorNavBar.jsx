@@ -42,7 +42,7 @@ const OperatorNavBar = () => {
         </li>
       </ul>
 
-      <NavBarMenu />
+      <NavBarMenu profileType="operator" />
     </nav>
   );
 };

@@ -32,7 +32,7 @@ const WorkerNavBar = () => {
         </li>
       </ul>
 
-      <NavBarMenu />
+      <NavBarMenu profileType="worker" />
     </nav>
   );
 };

@@ -8,7 +8,6 @@ const CitizenLeafletMap = ({ onMarkerChange }) => {
 
   useEffect(() => {
     if (navigator.geolocation) {
-      // Obtener la ubicación
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const { latitude, longitude } = pos.coords;
@@ -16,7 +15,6 @@ const CitizenLeafletMap = ({ onMarkerChange }) => {
         },
         (error) => {
           console.error("Error al obtener ubicación:", error);
-          // Si el usuario no da permiso, mostramos la Plaza San Martín
           setPosition([-26.18489, -58.17214]);
         }
       );
@@ -55,7 +53,6 @@ const CitizenLeafletMap = ({ onMarkerChange }) => {
               Ubicación seleccionada
             </Popup>
           </Marker>
-          {/* Componente que maneja los clics */}
           <MapClickHandler onClickPosition={positionUpdate} />
         </MapContainer>
       )}

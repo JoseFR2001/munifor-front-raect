@@ -3,25 +3,29 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import CitizenLeafletMap from "../../components/LeafletMaps/CitizenLeafletMap";
 import reportSchema from "../../schemas/ReportSchema.js";
 import { useState } from "react";
+import useFetch from "../../hooks/useFetch.js";
 
 const CitizenReports = () => {
-  const { register, handleSubmit, formState, watch } = useForm({
+  const { postFetch } = useFetch();
+  const { register, handleSubmit, formState, watch, reset } = useForm({
     resolver: zodResolver(reportSchema),
-    mode: "onChange",
   });
   const { errors } = formState;
   const [markerPosition, setMarkerPosition] = useState(null);
+
+  const handleMarkerChange = (position) => {
+    setMarkerPosition(position);
+  };
 
   const onSubmit = (data) => {
     if (!markerPosition) {
       alert("Por favor, selecciona una ubicación en el mapa");
       return;
     }
-    console.log({ ...data, markerPosition });
-  };
 
-  const handleMarkerChange = (position) => {
-    setMarkerPosition(position);
+    const [lat, lng] = markerPosition;
+    postFetch("/report", { ...data, location: { lat, lng } });
+    reset();
   };
 
   return (

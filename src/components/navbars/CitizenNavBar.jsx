@@ -27,7 +27,7 @@ const CitizenNavBar = () => {
         </li>
       </ul>
 
-      <NavBarMenu />
+      <NavBarMenu profileType="citizen" />
     </nav>
   );
 };

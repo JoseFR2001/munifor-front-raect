@@ -32,7 +32,7 @@ const AdminNavBar = () => {
         </li>
       </ul>
 
-      <NavBarMenu />
+      <NavBarMenu profileType="admin" />
     </nav>
   );
 };

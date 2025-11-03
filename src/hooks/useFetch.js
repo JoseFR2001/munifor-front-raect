@@ -70,7 +70,7 @@ const useFetch = () => {
   };
 
   // POST JSON con token
-  const postFetchDataLocalStorage = async (url, payload) => {
+  const postFetchLocalStorage = async (url, payload) => {
     const token = localStorage.getItem("token");
     if (!token) {
       window.location.replace("/login");
@@ -180,7 +180,7 @@ const useFetch = () => {
   return {
     getFetchData,
     postFetch,
-    postFetchDataLocalStorage,
+    postFetchLocalStorage,
     putFetch,
     patchFetch,
     deleteFetch,
