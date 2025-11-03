@@ -20,6 +20,16 @@ const AdminNavBar = () => {
             Mapa
           </Link>
         </li>
+        <li>
+          <Link to="/admin/registrationrequests" className="border rounded">
+            Solicitudes de registro
+          </Link>
+        </li>
+        <li>
+          <Link to="/admin/profilesearch" className="border rounded">
+            Búsqueda de perfiles
+          </Link>
+        </li>
       </ul>
 
       <NavBarMenu />

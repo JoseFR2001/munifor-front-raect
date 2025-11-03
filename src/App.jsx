@@ -34,6 +34,8 @@ import OperatorStatistics from "./pages/Operator/OperatorStatistics";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminStatistics from "./pages/Admin/AdminStatistics";
 import AdminMap from "./pages/Admin/AdminMap";
+import RegistrationRequests from "./pages/Admin/RegistrationRequests";
+import AdminProfileSearch from "./pages/Admin/AdminProfileSearch";
 
 //Registros
 import OperatorRegister from "./pages/Operator/OperatorRegister";
@@ -103,6 +105,14 @@ const App = () => {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/statistics" element={<AdminStatistics />} />
             <Route path="/admin/map" element={<AdminMap />} />
+            <Route
+              path="/admin/registrationrequests"
+              element={<RegistrationRequests />}
+            />
+            <Route
+              path="/admin/profilesearch"
+              element={<AdminProfileSearch />}
+            />
           </Route>
 
           {/* Actualizar contraseña */}
