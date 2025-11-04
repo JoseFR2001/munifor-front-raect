@@ -55,6 +55,8 @@ import CitizenLayout from "./layout/CitizenLayout";
 import OperatorLayout from "./layout/OperatorLayout";
 import WorkerLayout from "./layout/WorkerLayout";
 import AdminLayout from "./layout/AdminLayout";
+import FAQ from "./pages/General/Faq";
+import AdminGlobalView from "./pages/Admin/AdminGlobalView";
 
 const App = () => {
   return (
@@ -67,6 +69,7 @@ const App = () => {
             <Route path="/register" element={<CitizenRegister />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgotpassword" element={<ForgotPassword />} />
+            <Route path="/faq" element={<FAQ />} />
           </Route>
 
           {/* Ciudadano */}
@@ -124,6 +127,7 @@ const App = () => {
               element={<AdminProfileSearch />}
             />
             <Route path="/admin/profile" element={<AdminProfile />} />
+            <Route path="/admin/globalview" element={<AdminGlobalView />} />
           </Route>
 
           {/* Actualizar contraseña */}

@@ -30,6 +30,11 @@ const AdminNavBar = () => {
             Búsqueda de perfiles
           </Link>
         </li>
+        <li>
+          <Link to="/admin/globalview" className="border rounded">
+            Vista Global
+          </Link>
+        </li>
       </ul>
 
       <NavBarMenu profileType="admin" />

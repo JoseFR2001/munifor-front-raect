@@ -22,12 +22,12 @@ const OperatorNavBar = () => {
         </li>
         <li>
           <Link to="/operator/tasks" className="border rounded">
-            Tareas
+            Crear Tareas
           </Link>
         </li>
         <li>
           <Link to="/operator/teams" className="border rounded">
-            Equipos
+            Crear Equipos
           </Link>
         </li>
         <li>
