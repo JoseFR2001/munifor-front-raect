@@ -21,6 +21,7 @@ import WorkerProgress from "./pages/Worker/WorkerProgress";
 import WorkerTasks from "./pages/Worker/WorkerTasks";
 import WorkerTeam from "./pages/Worker/WorkerTeam";
 import WorkerProfile from "./pages/Worker/WorkerProfile";
+import WorkerProgressHistory from "./pages/Worker/WorkerProgressHistory";
 
 //Operador
 import OperatorDashboard from "./pages/Operator/OperatorDashboard";
@@ -82,6 +83,10 @@ const App = () => {
             <Route path="/worker/dashboard" element={<WorkerDashboard />} />
             <Route path="/worker/history" element={<WorkerHistory />} />
             <Route path="/worker/progress" element={<WorkerProgress />} />
+            <Route
+              path="/worker/progress-history"
+              element={<WorkerProgressHistory />}
+            />
             <Route path="/worker/tasks" element={<WorkerTasks />} />
             <Route path="/worker/team" element={<WorkerTeam />} />
             <Route path="/worker/profile" element={<WorkerProfile />} />

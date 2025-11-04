@@ -17,9 +17,16 @@ const WorkerNavBar = () => {
         </li>
         <li>
           <Link to="/worker/progress" className="border rounded">
-            Progreso
+            Crea un nuevo avance
           </Link>
         </li>
+
+        <li>
+          <Link to="/worker/progress-history" className="border rounded">
+            Historial de avances
+          </Link>
+        </li>
+
         <li>
           <Link to="/worker/team" className="border rounded">
             Equipo
