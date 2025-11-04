@@ -3,7 +3,7 @@ import useFetch from "../../hooks/useFetch";
 import ReportModal from "../../components/ReportModal";
 
 const OperatorReports = () => {
-  const { getFetchData } = useFetch();
+  const { getFetchData, putFetch } = useFetch();
   const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
 
@@ -18,9 +18,27 @@ const OperatorReports = () => {
       }
     };
     fetchReports();
-  }, []);
+  }, [selectedReport]);
+
+  const handleSelectReport = (reporte) => {
+    setSelectedReport(reporte);
+    console.log(reporte);
+    putFetch("/report/review", reporte._id);
+  };
 
   const closeModal = () => setSelectedReport(null);
+
+  const handleRejectReport = (id) => {
+    console.log("Report rejected:", id);
+    putFetch("/report/reject", id);
+    closeModal();
+  };
+
+  const handleAcceptReport = (id) => {
+    console.log("Report accepted:", id);
+    putFetch("/report/accept", id);
+    closeModal();
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -39,7 +57,7 @@ const OperatorReports = () => {
             <div
               key={idx}
               className="bg-white rounded-lg shadow p-3 flex justify-between items-center border border-gray-200 w-full max-w-2xl mx-auto min-h-14 hover:cursor-pointer"
-              onClick={() => setSelectedReport(reporte)}
+              onClick={() => handleSelectReport(reporte)}
             >
               <div>
                 <span className="block text-xl font-semibold text-gray-800">
@@ -66,7 +84,12 @@ const OperatorReports = () => {
           ))
         )}
         {selectedReport && (
-          <ReportModal report={selectedReport} closeModal={closeModal} />
+          <ReportModal
+            report={selectedReport}
+            closeModal={closeModal}
+            onReject={handleRejectReport}
+            onAccept={handleAcceptReport}
+          />
         )}
       </div>
     </div>

@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { UserContext } from "../context/UserContext";
 import ReportLeafletMap from "./LeafletMaps/ReportLeafletMap";
 
-const ReportModal = ({ report, closeModal }) => {
+const ReportModal = ({ report, closeModal, onReject, onAccept }) => {
   const { user } = useContext(UserContext);
   const handleGetDirections = () => {
     const { lat, lng } = report.location;
@@ -81,10 +81,16 @@ const ReportModal = ({ report, closeModal }) => {
             </div>
           </div>
           <div>
-            <button className="border p-1 m-1 hover:cursor-pointer">
+            <button
+              className="border p-1 m-1 hover:cursor-pointer"
+              onClick={() => onAccept(report._id)}
+            >
               Convertir en tarea
             </button>
-            <button className="border p-1 m-1 hover:cursor-pointer">
+            <button
+              className="border p-1 m-1 hover:cursor-pointer"
+              onClick={() => onReject(report._id)}
+            >
               Rechazar
             </button>
             <button

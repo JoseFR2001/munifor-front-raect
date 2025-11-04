@@ -20,7 +20,7 @@ const OperatorTasks = () => {
     };
     const fetchAcceptedReports = async () => {
       try {
-        const data = await getFetchData("/reports?accepted=true");
+        const data = await getFetchData("/reports/accepted");
         setAcceptedReports(Array.isArray(data?.reports) ? data.reports : []);
       } catch (error) {
         console.error("Error al obtener los reportes aceptados:", error);
@@ -71,7 +71,9 @@ const OperatorTasks = () => {
                 <span className="text-sm text-gray-500">
                   {report.description}
                 </span>
-                <span className="text-xs text-gray-400">ID: {report._id}</span>
+                <span className="text-xs text-gray-400">
+                  Autor: {report.author}
+                </span>
               </div>
             ))
           )}
