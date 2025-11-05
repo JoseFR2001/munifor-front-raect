@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
-import ReportModal from "../../components/ReportModal";
+import ReportDetails from "../../components/details/ReportDetails";
 
 const OperatorReports = () => {
   const { getFetchData, putFetch } = useFetch();
   const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [filter, setFilter] = useState("Todos");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const data = await getFetchData("/reports"); // Asume endpoint para todos los reportes ciudadanos
-        console.log(data);
+        const data = await getFetchData("/reports");
         setReports(data.reports);
       } catch (error) {
         console.error("Error al obtener los reportes ciudadanos:", error);
@@ -19,11 +20,27 @@ const OperatorReports = () => {
     };
     fetchReports();
   }, [selectedReport]);
+  // Filtros disponibles según los estados del backend
+  const statusOptions = [
+    "Todos",
+    "Pendiente",
+    "Revisado",
+    "Aceptado",
+    "Completado",
+    "Rechazado",
+  ];
+
+  // Filtrar reportes según el filtro seleccionado y el buscador
+  const filteredReports = (
+    filter === "Todos" ? reports : reports.filter((r) => r.status === filter)
+  ).filter((r) => r.title.toLowerCase().includes(search.toLowerCase()));
 
   const handleSelectReport = (reporte) => {
     setSelectedReport(reporte);
     console.log(reporte);
-    putFetch("/report/review", reporte._id);
+    if (reporte.status === "Pendiente") {
+      putFetch("/report/review", reporte._id);
+    }
   };
 
   const closeModal = () => setSelectedReport(null);
@@ -42,18 +59,42 @@ const OperatorReports = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto px-4 py-4 flex flex-col gap-2">
         <h2 className="text-xl font-bold text-gray-700">
           Reportes de Ciudadanos
         </h2>
+        <input
+          type="text"
+          placeholder="Buscar por nombre..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border rounded px-3 py-2 w-full max-w-md focus:outline-none focus:ring focus:border-blue-300"
+        />
+      </div>
+      {/* Mostrar siempre los botones de filtro */}
+      <div className="max-w-5xl mx-auto px-4 pb-4 flex gap-2">
+        {statusOptions.map((option) => (
+          <button
+            key={option}
+            className={`px-4 py-2 rounded border font-medium transition-colors duration-150
+              ${
+                filter === option
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-blue-600 border-blue-600"
+              }`}
+            onClick={() => setFilter(option)}
+          >
+            {option}
+          </button>
+        ))}
       </div>
       <div className="space-y-4">
-        {reports.length === 0 ? (
+        {filteredReports.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16">
             <h3>No hay reportes ciudadanos</h3>
           </div>
         ) : (
-          reports.map((reporte, idx) => (
+          filteredReports.map((reporte, idx) => (
             <div
               key={idx}
               className="bg-white rounded-lg shadow p-3 flex justify-between items-center border border-gray-200 w-full max-w-2xl mx-auto min-h-14 hover:cursor-pointer"
@@ -84,11 +125,12 @@ const OperatorReports = () => {
           ))
         )}
         {selectedReport && (
-          <ReportModal
+          <ReportDetails
             report={selectedReport}
-            closeModal={closeModal}
+            onClose={closeModal}
             onReject={handleRejectReport}
             onAccept={handleAcceptReport}
+            role={"Operador"}
           />
         )}
       </div>
