@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
+import useFilter from "../../hooks/useFilter";
 import ReportDetails from "../../components/details/ReportDetails";
 
 const OperatorReports = () => {
@@ -8,6 +9,7 @@ const OperatorReports = () => {
   const [selectedReport, setSelectedReport] = useState(null);
   const [filter, setFilter] = useState("Todos");
   const [search, setSearch] = useState("");
+  const { filterReportsByStatus, filterBySearch } = useFilter();
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -20,6 +22,7 @@ const OperatorReports = () => {
     };
     fetchReports();
   }, [selectedReport]);
+
   // Filtros disponibles según los estados del backend
   const statusOptions = [
     "Todos",
@@ -31,9 +34,12 @@ const OperatorReports = () => {
   ];
 
   // Filtrar reportes según el filtro seleccionado y el buscador
-  const filteredReports = (
-    filter === "Todos" ? reports : reports.filter((r) => r.status === filter)
-  ).filter((r) => r.title.toLowerCase().includes(search.toLowerCase()));
+  // filterReportsByStatus ya maneja el caso 'Todos'
+  const filteredReports = filterBySearch(
+    filterReportsByStatus(reports, filter),
+    search,
+    "title"
+  );
 
   const handleSelectReport = (reporte) => {
     setSelectedReport(reporte);

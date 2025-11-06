@@ -1,239 +1,136 @@
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 
-/**
- * AsideFilterMap.jsx
- * Barra lateral con filtros para el mapa (SIMPLE Y BÁSICO)
- *
- * Props:
- * - show: boolean - Si el aside está visible o no
- * - onClose: function - Función para cerrar el aside
- * - onFilterChange: function - Función que se ejecuta cuando se aplican los filtros
- * - onDataTypeChange: function - Función que se ejecuta cuando cambia el tipo de dato
- */
+const AsideFilterMap = ({ onApplyFilters }) => {
+  const { register, handleSubmit, watch } = useForm();
 
-const AsideFilterMap = ({ show, onClose, onFilterChange, onDataTypeChange }) => {
-  // ========================================
-  // ESTADOS LOCALES DE LOS FILTROS
-  // ========================================
-  const [dataType, setDataType] = useState("report");
-  const [status, setStatus] = useState("Todos");
-  const [type, setType] = useState("Todos");
-  const [priority, setPriority] = useState("Todos");
-  const [timeRange, setTimeRange] = useState("24h");
+  // Opción A: usar watch para leer dataType desde react-hook-form (sin estado local)
+  const dataType = watch("dataType");
 
-  // ========================================
-  // OPCIONES DE LOS SELECT
-  // ========================================
+  const onSubmit = (data) => {
+    // Normalizar a la forma que espera filterForMap: { dataType, status, type, priority, timeRange }
+    const filters = {};
+    if (data.dataType) filters.dataType = data.dataType;
 
-  // Opciones de estado según el tipo de dato
-  const statusOptions = {
-    report: [
-      "Todos",
-      "Pendiente",
-      "Revisado",
-      "Aceptado",
-      "Completado",
-      "Rechazado",
-    ],
-    task: ["Todos", "Pendiente", "En Progreso", "Finalizada"],
-    progress: ["Todos", "Pendiente", "En Progreso", "Finalizado"],
-  };
+    switch (data.dataType) {
+      case "report":
+        if (data.type) filters.type = data.type;
+        if (data.status) filters.status = data.status;
+        break;
+      case "task":
+        if (data.type) filters.type = data.type;
+        if (data.priority) filters.priority = data.priority;
+        if (data.status) filters.status = data.status;
+        break;
+      case "progress":
+        // en el formulario usamos `progressStatus` para el select de progreso
+        if (data.progressStatus) filters.status = data.progressStatus;
+        break;
+      default:
+        break;
+    }
 
-  // Opciones de tipo de reporte
-  const typeOptions = [
-    "Todos",
-    "Bache",
-    "Alumbrado",
-    "Basura",
-    "Incidente",
-    "Otro",
-  ];
+    if (data.timeRange) filters.timeRange = data.timeRange;
 
-  // Opciones de prioridad (solo para tareas)
-  const priorityOptions = ["Todos", "Alta", "Media", "Baja"];
-
-  // Opciones de rango de tiempo
-  const timeOptions = [
-    { value: "1h", label: "Última hora" },
-    { value: "6h", label: "Últimas 6 horas" },
-    { value: "12h", label: "Últimas 12 horas" },
-    { value: "24h", label: "Últimas 24 horas" },
-    { value: "7d", label: "Última semana" },
-    { value: "1m", label: "Último mes" },
-    { value: "3m", label: "Últimos 3 meses" },
-    { value: "6m", label: "Últimos 6 meses" },
-    { value: "1y", label: "Último año" },
-    { value: "all", label: "Sin límite" },
-  ];
-
-  // ========================================
-  // MANEJADORES DE CAMBIOS
-  // ========================================
-  // Cuando cambia el tipo de dato (report/task/progress)
-  const handleDataTypeChange = (newType) => {
-    setDataType(newType);
-    // Resetear los demás filtros
-    setStatus("Todos");
-    setType("Todos");
-    setPriority("Todos");
-    // Notificar al componente padre para que recargue los datos
-    if (onDataTypeChange) {
-      onDataTypeChange(newType);
+    // Llamar al callback del padre si existe, sino hacer un console.log para debug
+    if (typeof onApplyFilters === "function") {
+      onApplyFilters(filters);
+    } else {
+      console.log("filters:", filters);
     }
   };
-
-  // Cuando se hace click en "Aplicar filtros"
-  const handleApplyFilters = () => {
-    onFilterChange({
-      dataType,
-      status,
-      type,
-      priority,
-      timeRange,
-    });
-  };
-
-  // Resetear todos los filtros
-  const handleReset = () => {
-    setDataType("report");
-    setStatus("Todos");
-    setType("Todos");
-    setPriority("Todos");
-    setTimeRange("24h");
-  };
-
-  // ========================================
-  // RENDER
-  // ========================================
-
-  // Si no está visible, no renderizar nada
-  if (!show) return null;
-
   return (
-    <aside className="w-80 bg-white shadow-lg h-full overflow-y-auto">
-      {/* Header del aside */}
-      <div className="p-6 border-b flex justify-between items-center">
-        <h2 className="text-xl font-bold text-gray-700">🔍 Filtros</h2>
-        <button
-          onClick={onClose}
-          className="text-gray-500 hover:text-gray-700 text-2xl"
-          title="Cerrar filtros"
-        >
-          ✕
-        </button>
-      </div>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <h2>Filtros del Mapa</h2>
+      {/* Aquí van los filtros del mapa */}
+      <div>
+        <label htmlFor="dataType">Tipo de Dato:</label>
+        <select id="dataType" {...register("dataType")} value={dataType}>
+          <option value="">Seleccione un tipo de dato</option>
+          <option value="report">Reportes</option>
+          <option value="task">Tareas</option>
+          <option value="progress">Avance del trabajador</option>
+        </select>
 
-      {/* Contenido del aside */}
-      <div className="p-6 space-y-6">
-        {/* SELECT 1: Tipo de dato */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            📊 Tipo de dato
-          </label>
-          <select
-            value={dataType}
-            onChange={(e) => handleDataTypeChange(e.target.value)}
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="report">Reportes</option>
-            <option value="task">Tareas</option>
-            <option value="progress">Avances</option>
-          </select>
-        </div>
-
-        {/* SELECT 2: Estado */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            📋 Estado
-          </label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {statusOptions[dataType].map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* SELECT 3: Tipo de reporte (solo para reportes y tareas) */}
-        {(dataType === "report" || dataType === "task") && (
+        {dataType === "report" && (
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              🏷️ Tipo de reporte
-            </label>
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {typeOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
+            <label htmlFor="type">Tipo de Reporte:</label>
+            <select id="type" {...register("type")}>
+              <option value="">Seleccione un tipo de reporte</option>
+              <option value="Bache">Bache</option>
+              <option value="Alumbrado">Alumbrado</option>
+              <option value="Basura">Basura</option>
+              <option value="Otro">Otro</option>
+            </select>
+            <label htmlFor="status">Estado:</label>
+            <select id="status" {...register("status")}>
+              <option value="">Seleccione un estado</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Revisado">Revisado</option>
+              <option value="Aceptado">Aceptado</option>
+              <option value="Completado">Completado</option>
+              <option value="Rechazado">Rechazado</option>
             </select>
           </div>
         )}
 
-        {/* SELECT 4: Prioridad (solo para tareas) */}
         {dataType === "task" && (
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              ⚡ Prioridad
-            </label>
-            <select
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {priorityOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
+            <label htmlFor="type">Tipo de Tarea:</label>
+            {/*Tengo que corregir esto */}
+            <select id="type" {...register("type")}>
+              <option value="">Seleccione un tipo de tarea</option>
+              <option value="Mantenimiento">Mantenimiento</option>
+              <option value="Limpieza">Limpieza</option>
+              <option value="Reparación">Reparación</option>
+              <option value="Otro">Otro</option>
+            </select>
+            <label htmlFor="priority">Prioridad:</label>
+            <select id="priority" {...register("priority")}>
+              <option value="">Seleccione una prioridad</option>
+              <option value="alta">Alta</option>
+              <option value="media">Media</option>
+              <option value="baja">Baja</option>
+            </select>
+            <label htmlFor="status">Estado:</label>
+            <select id="status" {...register("status")}>
+              <option value="">Seleccione un estado</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="en-progreso">En Progreso</option>
+              <option value="completado">Completado</option>
+            </select>
+          </div>
+        )}
+        {dataType === "progress" && (
+          <div>
+            <label htmlFor="status">Avances del Trabajador:</label>
+            <select id="status" {...register("progressStatus")}>
+              <option value="">Seleccione un avance</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="en-progreso">En Progreso</option>
+              <option value="finalizado">Finalizado</option>
             </select>
           </div>
         )}
 
-        {/* SELECT 5: Rango de tiempo */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            ⏰ Rango de tiempo
-          </label>
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {timeOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Botón para aplicar filtros */}
-        <button
-          onClick={handleApplyFilters}
-          className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
-        >
-          ✅ Aplicar filtros
-        </button>
-
-        {/* Botón para resetear filtros */}
-        <button
-          onClick={handleReset}
-          className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
-        >
-          🔄 Resetear filtros
-        </button>
+        <label htmlFor="timeRange">Tiempo:</label>
+        <select id="timeRange" {...register("timeRange")}>
+          <option value="">Seleccione un rango de tiempo</option>
+          <option value="1h">Última hora</option>
+          <option value="6h">Últimas 6 horas</option>
+          <option value="12h">Últimas 12 horas</option>
+          <option value="24h">Últimas 24 horas</option>
+          <option value="7d">Última semana</option>
+          <option value="1m">Último mes</option>
+          <option value="3m">Últimos 3 meses</option>
+          <option value="6m">Últimos 6 meses</option>
+          <option value="1y">Último año</option>
+          <option value="all">Sin límite</option>
+        </select>
       </div>
-    </aside>
+      <div>
+        <button type="submit">Aplicar Filtros</button>
+      </div>
+    </form>
   );
 };
 

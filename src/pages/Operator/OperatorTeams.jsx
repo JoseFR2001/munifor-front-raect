@@ -1,103 +1,78 @@
 import { useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
+import useFilter from "../../hooks/useFilter";
+import CrewDetails from "../../components/details/CrewDetails";
 
 const OperatorTeams = () => {
   const { getFetchData } = useFetch();
   const [crews, setCrews] = useState([]);
-  const [workers, setWorkers] = useState([]);
+  const [selectedCrew, setSelectedCrew] = useState(null);
+  const [search, setSearch] = useState("");
+
+  const { filterBySearch } = useFilter();
 
   useEffect(() => {
     const fetchCrews = async () => {
       try {
-        const data = await getFetchData("/crew");
-        setCrews(data.crew);
+        const data = await getFetchData("/crews");
+        setCrews(data.crews || data);
       } catch (error) {
-        console.error("Error al obtener los equipos (crew):", error);
-      }
-    };
-    const fetchWorkers = async () => {
-      try {
-        const data = await getFetchData("/worker");
-        setWorkers(data.worker);
-      } catch (error) {
-        console.error("Error al obtener los trabajadores:", error);
+        console.error("Error al obtener las cuadrillas:", error);
       }
     };
     fetchCrews();
-    fetchWorkers();
-  }, []);
+  }, [selectedCrew]);
 
-  const handleCreateCrew = () => {
-    // Aquí iría la lógica para crear equipo (modal, navegación, etc.)
-    alert("Funcionalidad de crear equipo");
+  const filteredCrews = filterBySearch(crews, search, "name");
+
+  const handleSelectCrew = (crew) => {
+    setSelectedCrew(crew);
   };
+
+  const closePanel = () => setSelectedCrew(null);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <div className="max-w-5xl mx-auto px-4 py-4 flex flex-col items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-700">
-          Equipos y Trabajadores
-        </h2>
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-          onClick={handleCreateCrew}
-        >
-          Crear equipo
-        </button>
+      <div className="max-w-5xl mx-auto px-4 py-4 flex flex-col gap-2">
+        <h2 className="text-xl font-bold text-gray-700">Cuadrillas</h2>
+        <input
+          type="text"
+          placeholder="Buscar por nombre..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border rounded px-3 py-2 w-full max-w-md focus:outline-none focus:ring focus:border-blue-300"
+        />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto w-full">
-        {/* Sección de equipos */}
-        <div>
-          <h3 className="text-lg font-semibold text-indigo-700 mb-4">
-            Equipos creados
-          </h3>
-          {crews.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8">
-              <span className="text-gray-500">No hay equipos registrados</span>
-            </div>
-          ) : (
-            crews.map((crew, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-lg shadow p-3 flex justify-between items-center border border-gray-200 w-full mb-3 min-h-14"
-              >
+
+      <div className="space-y-4">
+        {filteredCrews.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <h3>No hay cuadrillas registradas</h3>
+          </div>
+        ) : (
+          filteredCrews.map((crew, idx) => (
+            <div
+              key={crew._id || idx}
+              className="bg-white rounded-lg shadow p-3 flex justify-between items-center border border-gray-200 w-full max-w-2xl mx-auto min-h-14 hover:cursor-pointer"
+              onClick={() => handleSelectCrew(crew)}
+            >
+              <div>
                 <span className="block text-xl font-semibold text-gray-800">
                   {crew.name}
                 </span>
-                <span className="px-5 py-2 rounded-full text-base font-medium bg-indigo-100 text-indigo-700">
-                  {crew.task ? crew.task : "Sin tarea asignada"}
+                <span className="block text-sm text-gray-500">
+                  Miembros: {crew.members ? crew.members.length : 0}
                 </span>
               </div>
-            ))
-          )}
-        </div>
-        {/* Sección de trabajadores */}
-        <div>
-          <h3 className="text-lg font-semibold text-blue-700 mb-4">
-            Trabajadores disponibles
-          </h3>
-          {workers.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8">
-              <span className="text-gray-500">
-                No hay trabajadores disponibles
+              <span className="px-4 py-2 rounded-full text-base font-medium bg-blue-100 text-blue-700">
+                Ver
               </span>
             </div>
-          ) : (
-            workers.map((worker, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-lg shadow p-3 flex justify-between items-center border border-gray-200 w-full mb-3 min-h-14"
-              >
-                <span className="block text-xl font-semibold text-gray-800">
-                  {worker.name}
-                </span>
-                <span className="px-5 py-2 rounded-full text-base font-medium bg-green-100 text-green-700">
-                  {worker.role ? worker.role : "Sin rol"}
-                </span>
-              </div>
-            ))
-          )}
-        </div>
+          ))
+        )}
+        {selectedCrew && (
+          <CrewDetails crew={selectedCrew} onClose={closePanel} />
+        )}
       </div>
     </div>
   );

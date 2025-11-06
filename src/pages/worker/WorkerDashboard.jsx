@@ -12,27 +12,27 @@ const WorkerDashboard = () => {
       {/* Tarjetas de estadísticas de tareas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-          <div className="text-4xl mb-4">📋</div>
-          <p className="text-4xl font-bold mb-2">-</p>
-          <h3 className="text-lg font-semibold">Total</h3>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
           <div className="text-4xl mb-4">⏱️</div>
           <p className="text-4xl font-bold mb-2">-</p>
-          <h3 className="text-lg font-semibold">Pendientes</h3>
+          <h3 className="text-lg font-semibold">Pendiente</h3>
         </div>
 
         <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
           <div className="text-4xl mb-4">🔄</div>
           <p className="text-4xl font-bold mb-2">-</p>
-          <h3 className="text-lg font-semibold">En Proceso</h3>
+          <h3 className="text-lg font-semibold">En Progreso</h3>
         </div>
 
         <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
           <div className="text-4xl mb-4">✅</div>
           <p className="text-4xl font-bold mb-2">-</p>
-          <h3 className="text-lg font-semibold">Completadas</h3>
+          <h3 className="text-lg font-semibold">Finalizada</h3>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+          <div className="text-4xl mb-4">📋</div>
+          <p className="text-4xl font-bold mb-2">-</p>
+          <h3 className="text-lg font-semibold">Total</h3>
         </div>
       </div>
     </div>

@@ -1,9 +1,9 @@
-import OperatorLeafletMap from "../../components/LeafletMaps/OperatorLeafletMap";
+import GlobalLeafletMap from "../../components/LeafletMaps/GlobalLeafletMap";
 
 const OperatorMap = () => {
   return (
     <div className="w-full h-full">
-      <OperatorLeafletMap />
+      <GlobalLeafletMap />
     </div>
   );
 };

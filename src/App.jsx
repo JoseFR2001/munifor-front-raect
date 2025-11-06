@@ -57,6 +57,8 @@ import WorkerLayout from "./layout/WorkerLayout";
 import AdminLayout from "./layout/AdminLayout";
 import FAQ from "./pages/General/Faq";
 import AdminGlobalView from "./pages/Admin/AdminGlobalView";
+import OperatorCreateTask from "./pages/Operator/OperatorCreateTask";
+import OperatorCreateTeams from "./pages/Operator/OperatorCreateTeam";
 
 const App = () => {
   return (
@@ -110,6 +112,14 @@ const App = () => {
             <Route
               path="/operator/statistics"
               element={<OperatorStatistics />}
+            />
+            <Route
+              path="/operator/create-task"
+              element={<OperatorCreateTask />}
+            />
+            <Route
+              path="/operator/create-team"
+              element={<OperatorCreateTeams />}
             />
           </Route>
 
