@@ -123,6 +123,32 @@ const useFetch = () => {
     }
   };
 
+  const putFetchProfile = async (url, payload) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.replace("/login");
+      return;
+    }
+    try {
+      const response = await fetch(`${hostPort}${url}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.msg || "Error de red o respuesta no válida");
+      }
+      return data;
+    } catch (error) {
+      console.error("Error al actualizar datos:", error);
+      throw error;
+    }
+  };
+
   // PATCH JSON con token
   const patchFetch = async (url, payload) => {
     const token = localStorage.getItem("token");
@@ -182,6 +208,7 @@ const useFetch = () => {
     postFetch,
     postFetchLocalStorage,
     putFetch,
+    putFetchProfile,
     patchFetch,
     deleteFetch,
     getByIdFetch,

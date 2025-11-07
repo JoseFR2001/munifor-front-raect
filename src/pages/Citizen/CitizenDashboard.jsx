@@ -33,7 +33,7 @@ const CitizenDashboard = () => {
       {/* Título y descripción */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-blue-600 mb-2">
-          ¡Bienvenido, Usuario!
+          ¡Bienvenido, {user?.role}!
         </h1>
         <p className="text-gray-600">Panel de control del ciudadano</p>
       </div>
