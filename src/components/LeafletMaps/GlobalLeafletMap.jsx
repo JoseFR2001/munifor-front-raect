@@ -5,6 +5,7 @@ import useFetch from "../../hooks/useFetch";
 import useFilter from "../../hooks/useFilter";
 import { useEffect, useState } from "react";
 import AsideFilterMap from "./AsideFilterMap";
+import ReportDetails from "../details/ReportDetails";
 
 const GlobalLeafletMap = () => {
   const [allData, setAllData] = useState({
@@ -15,6 +16,7 @@ const GlobalLeafletMap = () => {
   const [filters, setFilters] = useState({ dataType: "report" });
   const { getFetchData } = useFetch();
   const { filterForMap } = useFilter();
+  const [selectedReport, setSelectedReport] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,9 +39,15 @@ const GlobalLeafletMap = () => {
   // Aplicar filtros usando el hook useFilter
   const filteredData = filterForMap(allData, filters);
 
+  const handleSelectReport = (reporte) => {
+    setSelectedReport(reporte);
+    console.log(reporte);
+  };
+  const closeModal = () => setSelectedReport(null);
+
   return (
-    <div className="flex flex-col">
-      <aside className="p-4 bg-gray-100 border-b">
+    <div className="flex flex-col relative">
+      <aside className="flex-col-1 p-4 bg-gray-100 border-b">
         <AsideFilterMap onFilters={handleApplyFilters} />
       </aside>
 
@@ -63,6 +71,11 @@ const GlobalLeafletMap = () => {
                   item.task_type?.toLowerCase() ||
                   "otros"
               )}
+              eventHandlers={{
+                click: () => {
+                  handleSelectReport(item);
+                },
+              }}
             >
               <Popup>
                 <div>
@@ -88,6 +101,20 @@ const GlobalLeafletMap = () => {
             </Marker>
           ))}
         </MapContainer>
+        {/* Overlay para el modal de detalles */}
+        {selectedReport && (
+          <div
+            style={{
+              zIndex: 9999,
+            }}
+          >
+            <ReportDetails
+              report={selectedReport}
+              onClose={closeModal}
+              role={"Operador"}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
