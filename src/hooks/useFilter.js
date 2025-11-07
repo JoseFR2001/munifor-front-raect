@@ -163,7 +163,7 @@ const useFilter = () => {
   /**
    * Filtro dinámico para el mapa del Operador/Admin
    * Permite combinar múltiples filtros en una sola función
-   * @param {Array} data - Array de datos (reports, tasks o progressReports)
+   * @param {Object} data - Objeto con arrays de datos ({ reports, tasks, progress })
    * @param {Object} filters - Objeto con los filtros a aplicar
    * @param {String} filters.dataType - Tipo de dato ('report', 'task', 'progress')
    * @param {String} filters.status - Estado
@@ -173,17 +173,38 @@ const useFilter = () => {
    * @returns {Array} - Datos filtrados
    */
   const filterForMap = (data, filters = {}) => {
-    let filteredData = [...data];
-
-    // Filtrar por tipo de dato
     const { dataType, status, type, priority, timeRange } = filters;
 
-    // Aplicar filtro de tiempo primero (más restrictivo)
+    // Seleccionar el conjunto de datos correcto según el tipo
+    let selectedData = [];
+    switch (dataType) {
+      case "report":
+        selectedData = data.reports || [];
+        break;
+      case "task":
+        selectedData = data.tasks || [];
+        break;
+      case "progress":
+        selectedData = data.progress || [];
+        break;
+      default:
+        // Si no se especifica tipo, devolver todos combinados
+        selectedData = [
+          ...(data.reports || []),
+          ...(data.tasks || []),
+          ...(data.progress || []),
+        ];
+        break;
+    }
+
+    let filteredData = [...selectedData];
+
+    // Aplicar filtro de tiempo primero (si existe)
     if (timeRange) {
       filteredData = filterByTime(filteredData, timeRange);
     }
 
-    // Aplicar filtros según el tipo de dato
+    // Aplicar filtros específicos según el tipo
     switch (dataType) {
       case "report":
         if (status) filteredData = filterReportsByStatus(filteredData, status);

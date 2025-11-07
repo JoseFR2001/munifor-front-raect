@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 
-const AsideFilterMap = ({ onApplyFilters }) => {
+const AsideFilterMap = ({ onFilters }) => {
   const { register, handleSubmit, watch } = useForm();
 
   // Opción A: usar watch para leer dataType desde react-hook-form (sin estado local)
@@ -32,8 +32,8 @@ const AsideFilterMap = ({ onApplyFilters }) => {
     if (data.timeRange) filters.timeRange = data.timeRange;
 
     // Llamar al callback del padre si existe, sino hacer un console.log para debug
-    if (typeof onApplyFilters === "function") {
-      onApplyFilters(filters);
+    if (typeof onFilters === "function") {
+      onFilters(filters);
     } else {
       console.log("filters:", filters);
     }
@@ -44,7 +44,7 @@ const AsideFilterMap = ({ onApplyFilters }) => {
       {/* Aquí van los filtros del mapa */}
       <div>
         <label htmlFor="dataType">Tipo de Dato:</label>
-        <select id="dataType" {...register("dataType")} value={dataType}>
+        <select id="dataType" {...register("dataType")}>
           <option value="">Seleccione un tipo de dato</option>
           <option value="report">Reportes</option>
           <option value="task">Tareas</option>
