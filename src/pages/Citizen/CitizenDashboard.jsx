@@ -66,6 +66,14 @@ const CitizenDashboard = () => {
           <h3 className="text-xl font-semibold mb-2">Mi Perfil</h3>
           <p className="text-gray-600 text-sm">Editar información personal</p>
         </div>
+        <div
+          className="bg-white rounded-lg shadow p-6 border border-gray-200 hover:cursor-pointer"
+          onClick={() => navigate("/citizen/contact")}
+        >
+          <div className="text-4xl mb-4">✉️</div>
+          <h3 className="text-xl font-semibold mb-2">Contactanos</h3>
+          <p className="text-gray-600 text-sm">Envianos tus consultas</p>
+        </div>
       </div>
 
       {/* Tarjetas de estadísticas por status */}

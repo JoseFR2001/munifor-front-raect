@@ -1,4 +1,31 @@
+import { useEffect, useState } from "react";
+import useFetch from "../../hooks/useFetch";
+import { useNavigate } from "react-router-dom";
+
 const OperatorDashboard = () => {
+  const [counts, setCounts] = useState({
+    totalNewReports: 0,
+    inProcess: 0,
+    completed: 0,
+    rejected: 0,
+    activeCrews: 0,
+    assignedTasks: 0,
+  });
+  const { getFetchData } = useFetch();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const data = await getFetchData("/dashboard/operators");
+        if (data.ok) setCounts(data.counts);
+      } catch (err) {
+        // Puedes mostrar un error si lo deseas
+      }
+    };
+    fetchCounts();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Título y descripción */}
@@ -13,49 +40,61 @@ const OperatorDashboard = () => {
 
       {/* Tarjetas de estadísticas principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <div
+          className="bg-white rounded-lg shadow p-6 border border-gray-200 hover:cursor-pointer"
+          onClick={() => navigate("/operator/reports")}
+        >
           <div className="text-4xl mb-4">📋</div>
-          <p className="text-4xl font-bold mb-2">-</p>
-          <h3 className="text-lg font-semibold">Total Reportes</h3>
+          <p className="text-4xl font-bold mb-2">{counts.totalNewReports}</p>
+          <h3 className="text-lg font-semibold">Total de Nuevos Reportes</h3>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <div
+          className="bg-white rounded-lg shadow p-6 border border-gray-200 hover:cursor-pointer"
+          onClick={() => navigate("/operator/reports?status=Rechazado")}
+        >
           <div className="text-4xl mb-4">⏱️</div>
-          <p className="text-4xl font-bold mb-2">-</p>
-          <h3 className="text-lg font-semibold">Pendientes</h3>
+          <p className="text-4xl font-bold mb-2">{counts.rejected}</p>
+          <h3 className="text-lg font-semibold">Rechazados</h3>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <div
+          className="bg-white rounded-lg shadow p-6 border border-gray-200 hover:cursor-pointer"
+          onClick={() => navigate("/operator/reports?status=Aceptado")}
+        >
           <div className="text-4xl mb-4">⚠️</div>
-          <p className="text-4xl font-bold mb-2">-</p>
+          <p className="text-4xl font-bold mb-2">{counts.inProcess}</p>
           <h3 className="text-lg font-semibold">En Proceso</h3>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <div
+          className="bg-white rounded-lg shadow p-6 border border-gray-200 hover:cursor-pointer"
+          onClick={() => navigate("/operator/reports?status=Completado")}
+        >
           <div className="text-4xl mb-4">✅</div>
-          <p className="text-4xl font-bold mb-2">-</p>
+          <p className="text-4xl font-bold mb-2">{counts.completed}</p>
           <h3 className="text-lg font-semibold">Completados</h3>
         </div>
       </div>
 
       {/* Tarjetas de estadísticas secundarias */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <div
+          className="bg-white rounded-lg shadow p-6 border border-gray-200 hover:cursor-pointer"
+          onClick={() => navigate("/operator/teams")}
+        >
           <div className="text-4xl mb-4">👥</div>
-          <p className="text-4xl font-bold mb-2">-</p>
+          <p className="text-4xl font-bold mb-2">{counts.activeCrews}</p>
           <h3 className="text-lg font-semibold">Cuadrillas Activas</h3>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <div
+          className="bg-white rounded-lg shadow p-6 border border-gray-200 hover:cursor-pointer"
+          onClick={() => navigate("/operator/tasks")}
+        >
           <div className="text-4xl mb-4">📝</div>
-          <p className="text-4xl font-bold mb-2">-</p>
+          <p className="text-4xl font-bold mb-2">{counts.assignedTasks}</p>
           <h3 className="text-lg font-semibold">Tareas Asignadas</h3>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-          <div className="text-4xl mb-4">📊</div>
-          <p className="text-4xl font-bold mb-2">-%</p>
-          <h3 className="text-lg font-semibold">Tasa de Resolución</h3>
         </div>
       </div>
 
@@ -66,7 +105,10 @@ const OperatorDashboard = () => {
         </h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <div
+          className="bg-white rounded-lg shadow p-6 border border-gray-200 hover:cursor-pointer"
+          onClick={() => navigate("/operator/reports")}
+        >
           <div className="text-4xl mb-4">📋</div>
           <h3 className="text-lg font-semibold mb-2">Gestionar Reportes</h3>
           <p className="text-gray-600 text-sm">
@@ -74,13 +116,19 @@ const OperatorDashboard = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <div
+          className="bg-white rounded-lg shadow p-6 border border-gray-200 hover:cursor-pointer"
+          onClick={() => navigate("/operator/create-task")}
+        >
           <div className="text-4xl mb-4">👥</div>
           <h3 className="text-lg font-semibold mb-2">Asignar Tareas</h3>
           <p className="text-gray-600 text-sm">Asignar trabajos a cuadrillas</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <div
+          className="bg-white rounded-lg shadow p-6 border border-gray-200 hover:cursor-pointer"
+          onClick={() => navigate("/operator/map")}
+        >
           <div className="text-4xl mb-4">🗺️</div>
           <h3 className="text-lg font-semibold mb-2">Ver Mapa</h3>
           <p className="text-gray-600 text-sm">
@@ -88,7 +136,10 @@ const OperatorDashboard = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <div
+          className="bg-white rounded-lg shadow p-6 border border-gray-200 hover:cursor-pointer"
+          onClick={() => navigate("/operator/statistics")}
+        >
           <div className="text-4xl mb-4">📊</div>
           <h3 className="text-lg font-semibold mb-2">Estadísticas</h3>
           <p className="text-gray-600 text-sm">

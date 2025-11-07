@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import useFilter from "../../hooks/useFilter";
 import ReportDetails from "../../components/details/ReportDetails";
@@ -7,7 +8,9 @@ const OperatorReports = () => {
   const { getFetchData, putFetch } = useFetch();
   const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
-  const [filter, setFilter] = useState("Todos");
+  const [searchParams] = useSearchParams();
+  const statusParam = searchParams.get("status");
+  const [filter, setFilter] = useState(() => statusParam || "Todos");
   const [search, setSearch] = useState("");
   const { filterReportsByStatus, filterBySearch } = useFilter();
 
