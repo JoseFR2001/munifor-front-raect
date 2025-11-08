@@ -82,18 +82,17 @@ const useFilter = () => {
   };
 
   // ========================================
-  // FILTRO 5: TIPO DE REPORTE EN TAREA
+  // FILTRO 5: TIPO DE TAREA (task_type)
   // ========================================
   /**
-   * Filtra tareas por el tipo de reporte asociado
-   * NOTA: Requiere que task.report esté populado
+   * Filtra tareas por tipo de tarea (task_type)
    * @param {Array} tasks - Array de tareas
-   * @param {String} reportType - Tipo de reporte (Bache, Alumbrado, etc.)
+   * @param {String} taskType - Tipo de tarea (Reparación, Mantenimiento, etc.)
    * @returns {Array} - Tareas filtradas
    */
-  const filterTasksByReportType = (tasks, reportType) => {
-    if (!reportType || reportType === "Todos") return tasks;
-    return tasks.filter((task) => task.report?.report_type === reportType);
+  const filterTasksByTaskType = (tasks, taskType) => {
+    if (!taskType || taskType === "Todos") return tasks;
+    return tasks.filter((task) => task.task_type === taskType);
   };
 
   // ========================================
@@ -215,7 +214,7 @@ const useFilter = () => {
         if (status) filteredData = filterTasksByStatus(filteredData, status);
         if (priority)
           filteredData = filterTasksByPriority(filteredData, priority);
-        if (type) filteredData = filterTasksByReportType(filteredData, type);
+        if (type) filteredData = filterTasksByTaskType(filteredData, type);
         break;
 
       case "progress":
@@ -319,7 +318,7 @@ const useFilter = () => {
     filterReportsByStatus, // Filtro 2
     filterReportsByType, // Filtro 3
     filterTasksByStatus, // Filtro 4
-    filterTasksByReportType, // Filtro 5
+    filterTasksByTaskType, // Filtro 5
     filterTasksByPriority, // Filtro 6
     filterProgressByStatus, // Filtro 7
     filterByTime, // Filtro 8

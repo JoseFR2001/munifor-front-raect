@@ -6,7 +6,7 @@ export const getIconReport = (type, status) => {
     bache: "#e74c3c", // rojo - peligro
     alumbrado: "#f39c12", // naranja - atención
     basura: "#27ae60", // verde - limpieza
-    otros: "#9333ea", // gris - general
+    otro: "#9333ea", // violeta - general
   };
 
   const statusColorMap = {
@@ -30,9 +30,7 @@ export const getIconReport = (type, status) => {
                     justify-content:center;
                     border:3px solid ${statusColorMap[status]};
                     box-shadow: 0 3px 8px rgba(0,0,0,0.3);">
-          <span style="transform: rotate(45deg); display: flex; align-items: center; justify-content: center;">${
-            ICONS[type] || ICONS["otros"]
-          }</span>
+          <span style="transform: rotate(45deg); display: flex; align-items: center; justify-content: center;">${ICONS[type]}</span>
         </div>
       </div>
     `,
@@ -43,11 +41,12 @@ export const getIconReport = (type, status) => {
   });
 };
 
-export const getIconTask = (status, priority) => {
-  const statusColorMap = {
-    pendiente: "#f59e42", // naranja
-    "en progreso": "#3b82f6", // azul
-    finalizada: "#10b981", // verde más fuerte
+export const getIconTask = (type, priority) => {
+  const typeColorMap = {
+    reparación: "#e74c3c", // rojo - alta prioridad
+    mantenimiento: "#f39c12", // naranja - media prioridad
+    recolección: "#27ae60", // verde - baja prioridad
+    supervisión: "#9333ea", // violeta - general
   };
 
   const priorityColorMap = {
@@ -59,7 +58,7 @@ export const getIconTask = (status, priority) => {
   return L.divIcon({
     html: `
       <div style="position: relative; width: 40px; height: 50px;">
-        <div style="background:${statusColorMap[status]}; 
+        <div style="background:${typeColorMap[type]}; 
                     width: 40px; 
                     height: 40px;
                     border-radius: 50% 50% 50% 0;
@@ -69,7 +68,7 @@ export const getIconTask = (status, priority) => {
                     justify-content:center;
                     border:3px solid ${priorityColorMap[priority]};
                     box-shadow: 0 3px 8px rgba(0,0,0,0.3);">
-          <span style="transform: rotate(45deg); display: flex; align-items: center; justify-content: center;">${ICONS.task}</span>
+          <span style="transform: rotate(45deg); display: flex; align-items: center; justify-content: center;">${ICONS[type]}</span>
         </div>
       </div>
     `,

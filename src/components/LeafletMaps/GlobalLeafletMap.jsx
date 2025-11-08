@@ -72,9 +72,11 @@ const GlobalLeafletMap = () => {
                   )}
                   eventHandlers={{
                     click: () => handleSelectReport(item),
+                    mouseover: (e) => e.target.openPopup(),
+                    mouseout: (e) => e.target.closePopup(),
                   }}
                 >
-                  {/* DEBO REVISAR ESTO */}
+                  {/* Debo controlar el contenido del Popup */}
                   <Popup>
                     <div>
                       <b>{item.report_type?.toUpperCase()}</b>
@@ -101,13 +103,16 @@ const GlobalLeafletMap = () => {
                     item.report.location.lng,
                   ]}
                   icon={getIconTask(
-                    item.status?.toLowerCase(),
+                    item.task_type?.toLowerCase(),
                     item.priority?.toLowerCase()
                   )}
                   eventHandlers={{
                     click: () => handleSelectReport(item),
+                    mouseover: (e) => e.target.openPopup(),
+                    mouseout: (e) => e.target.closePopup(),
                   }}
                 >
+                  {/* Debo controlar el contenido del Popup */}
                   <Popup>
                     <div>
                       <b>{item.task_type?.toUpperCase()}</b>
@@ -129,8 +134,11 @@ const GlobalLeafletMap = () => {
                   icon={getIconProgress(item.status?.toLowerCase())}
                   eventHandlers={{
                     click: () => handleSelectReport(item),
+                    mouseover: (e) => e.target.openPopup(),
+                    mouseout: (e) => e.target.closePopup(),
                   }}
                 >
+                  {/* Debo controlar el contenido del Popup */}
                   <Popup>
                     <div>
                       <b>PROGRESO</b>
@@ -147,6 +155,7 @@ const GlobalLeafletMap = () => {
         </MapContainer>
 
         {/* PANEL DE DETALLES (ASIDE DERECHO) */}
+        {/* Esto varia segun el tipo de dato */}
         {selectedReport && (
           <ReportDetails
             report={selectedReport}
