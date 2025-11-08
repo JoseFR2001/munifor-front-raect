@@ -10,7 +10,8 @@ const WorkerTasks = () => {
     const fetchTasks = async () => {
       try {
         const data = await getFetchData("/task/worker"); // Endpoint para tareas del trabajador
-        setTasks(data);
+        console.log(data);
+        setTasks(data.tasks);
       } catch (error) {
         setTasks([]);
       }
