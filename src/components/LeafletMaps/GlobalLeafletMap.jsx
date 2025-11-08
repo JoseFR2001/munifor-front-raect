@@ -21,7 +21,6 @@ const GlobalLeafletMap = () => {
   useEffect(() => {
     const fetchData = async () => {
       const data = await getFetchData("/map/data");
-      console.log("Fetched map data:", data);
       setAllData({
         reports: data.reports || [],
         tasks: data.tasks || [],
@@ -32,36 +31,31 @@ const GlobalLeafletMap = () => {
   }, []);
 
   const handleApplyFilters = (newFilters) => {
-    console.log("Filtros aplicados: ", newFilters);
     setFilters(newFilters);
   };
 
-  // Aplicar filtros usando el hook useFilter
   const filteredData = filterForMap(allData, filters);
-
-  const handleSelectReport = (reporte) => {
-    setSelectedReport(reporte);
-    console.log(reporte);
-  };
+  const handleSelectReport = (reporte) => setSelectedReport(reporte);
   const closeModal = () => setSelectedReport(null);
 
   return (
-    <div className="flex flex-col relative">
-      <aside className="flex-col-1 p-4 bg-gray-100 border-b">
+    <div className="flex h-screen">
+      {/* ASIDE IZQUIERDO - Filtros */}
+      <aside className="w-1/6 bg-gray-100 border-r border-gray-300 p-4 overflow-y-auto">
         <AsideFilterMap onFilters={handleApplyFilters} />
       </aside>
 
-      <div style={{ height: "100vh", width: "100%" }}>
+      {/* MAPA CENTRAL */}
+      <main className="flex-1 relative">
         <MapContainer
           center={[-26.1849, -58.1731]}
           zoom={15}
-          style={{ height: "100%", width: "100%" }}
+          className="h-full w-full z-0"
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://osm.org">OpenStreetMap</a> contributors'
           />
-
           {filteredData.map((item) => (
             <Marker
               key={item._id}
@@ -72,9 +66,7 @@ const GlobalLeafletMap = () => {
                   "otros"
               )}
               eventHandlers={{
-                click: () => {
-                  handleSelectReport(item);
-                },
+                click: () => handleSelectReport(item),
               }}
             >
               <Popup>
@@ -91,7 +83,7 @@ const GlobalLeafletMap = () => {
                   {item.status && (
                     <>
                       <br />
-                      <small style={{ color: "#666" }}>
+                      <small className="text-gray-600">
                         Estado: {item.status}
                       </small>
                     </>
@@ -101,21 +93,16 @@ const GlobalLeafletMap = () => {
             </Marker>
           ))}
         </MapContainer>
-        {/* Overlay para el modal de detalles */}
+
+        {/* PANEL DE DETALLES (ASIDE DERECHO) */}
         {selectedReport && (
-          <div
-            style={{
-              zIndex: 9999,
-            }}
-          >
-            <ReportDetails
-              report={selectedReport}
-              onClose={closeModal}
-              role={"Operador"}
-            />
-          </div>
+          <ReportDetails
+            report={selectedReport}
+            onClose={closeModal}
+            role="Operador"
+          />
         )}
-      </div>
+      </main>
     </div>
   );
 };
