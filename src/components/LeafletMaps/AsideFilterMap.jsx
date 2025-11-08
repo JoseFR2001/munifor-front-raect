@@ -79,24 +79,24 @@ const AsideFilterMap = ({ onFilters }) => {
             {/*Tengo que corregir esto */}
             <select id="type" {...register("type")}>
               <option value="">Seleccione un tipo de tarea</option>
-              <option value="Mantenimiento">Mantenimiento</option>
-              <option value="Limpieza">Limpieza</option>
-              <option value="Reparación">Reparación</option>
+              <option value="Bache">Bache</option>
+              <option value="Alumbrado">Alumbrado</option>
+              <option value="Basura">Basura</option>
               <option value="Otro">Otro</option>
             </select>
             <label htmlFor="priority">Prioridad:</label>
             <select id="priority" {...register("priority")}>
               <option value="">Seleccione una prioridad</option>
-              <option value="alta">Alta</option>
-              <option value="media">Media</option>
-              <option value="baja">Baja</option>
+              <option value="Alta">Alta</option>
+              <option value="Media">Media</option>
+              <option value="Baja">Baja</option>
             </select>
             <label htmlFor="status">Estado:</label>
             <select id="status" {...register("status")}>
               <option value="">Seleccione un estado</option>
-              <option value="pendiente">Pendiente</option>
-              <option value="en-progreso">En Progreso</option>
-              <option value="completado">Completado</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="En Progreso">En Progreso</option>
+              <option value="Completado">Completado</option>
             </select>
           </div>
         )}
