@@ -1,4 +1,5 @@
 const CrewDetails = ({ crew, onClose }) => {
+  console.log(crew);
   return (
     <section
       className="absolute top-0 right-0 h-full max-w-md w-full bg-white shadow-2xl z-40 flex flex-col border-l border-gray-200"
@@ -16,8 +17,11 @@ const CrewDetails = ({ crew, onClose }) => {
           <span className="font-semibold">Nombre:</span> {crew?.name}
         </p>
         <p>
+          <span className="font-semibold">Líder:</span> {crew?.leader?.username}
+        </p>
+        <p>
           <span className="font-semibold">Miembros:</span>{" "}
-          {crew?.members?.join(", ")}
+          {crew?.members?.map((member) => member.username).join(", ")}
         </p>
         {/* Puedes agregar más campos aquí */}
       </div>

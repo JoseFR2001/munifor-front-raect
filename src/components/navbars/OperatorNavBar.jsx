@@ -16,6 +16,11 @@ const OperatorNavBar = () => {
           </Link>
         </li>
         <li>
+          <Link to="/operator/new-reports" className="border rounded">
+            Nuevos Reportes
+          </Link>
+        </li>
+        <li>
           <Link to="/operator/reports" className="border rounded">
             Reportes
           </Link>

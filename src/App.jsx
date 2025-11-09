@@ -59,6 +59,7 @@ import FAQ from "./pages/General/Faq";
 import AdminGlobalView from "./pages/Admin/AdminGlobalView";
 import OperatorCreateTask from "./pages/Operator/OperatorCreateTask";
 import OperatorCreateTeams from "./pages/Operator/OperatorCreateTeam";
+import OperatorNewReports from "./pages/Operator/OperatorNewReports";
 
 const App = () => {
   return (
@@ -120,6 +121,10 @@ const App = () => {
             <Route
               path="/operator/create-team"
               element={<OperatorCreateTeams />}
+            />
+            <Route
+              path="/operator/new-reports"
+              element={<OperatorNewReports />}
             />
           </Route>
 

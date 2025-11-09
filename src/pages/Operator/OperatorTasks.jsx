@@ -16,8 +16,9 @@ const OperatorTasks = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const data = await getFetchData("/tasks");
-        setTasks(data.tasks || data);
+        const data = await getFetchData("/task/operator");
+        setTasks(data.tasks);
+        console.log(data.tasks);
       } catch (error) {
         console.error("Error al obtener las tareas:", error);
       }

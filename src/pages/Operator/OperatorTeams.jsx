@@ -15,7 +15,8 @@ const OperatorTeams = () => {
     const fetchCrews = async () => {
       try {
         const data = await getFetchData("/crews");
-        setCrews(data.crews || data);
+        setCrews(data.crews);
+        console.log(data);
       } catch (error) {
         console.error("Error al obtener las cuadrillas:", error);
       }
