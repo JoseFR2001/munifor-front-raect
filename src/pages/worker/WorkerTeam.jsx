@@ -1,17 +1,37 @@
+//* ========================================
+//* PÁGINA: WorkerTeam
+//* ========================================
+//* Propósito: Muestra el equipo actual y equipos anteriores del trabajador
+//* Ruta: /worker/team
+//* Layout: WorkerLayout
+//* Características:
+//*   - Columna izquierda: Equipo actual + Equipos anteriores
+//*   - Columna derecha: Detalles del equipo seleccionado (líder, miembros, estado)
+//*   - Endpoint: /crew/worker (equipo actual y equipos pasados del trabajador)
+//*   - Badge "Líder" si el usuario es el líder del equipo
+//*   - Muestra fecha de finalización si el equipo está inactivo
+
 import { useEffect, useState, useContext } from "react";
 import useFetch from "../../hooks/useFetch";
 import { UserContext } from "../../context/UserContext";
 
 const WorkerTeam = () => {
+  //* ========================================
+  //* CONTEXTO Y ESTADO
+  //* ========================================
   const { getFetchData } = useFetch();
   const [currentCrew, setCurrentCrew] = useState(null);
   const [pastCrews, setPastCrews] = useState([]);
   const [selectedCrew, setSelectedCrew] = useState(null);
   const { user } = useContext(UserContext);
 
+  //* ========================================
+  //* EFECTO: Cargar equipos al montar
+  //* ========================================
   useEffect(() => {
     const fetchCrews = async () => {
       try {
+        //! Endpoint que trae el equipo actual y equipos pasados del trabajador
         const data = await getFetchData("/crew/worker");
         console.log(data);
         setCurrentCrew(data.crew);
@@ -25,11 +45,16 @@ const WorkerTeam = () => {
     fetchCrews();
   }, []);
 
+  //* ========================================
+  //* RENDER
+  //* ========================================
   return (
     <div className="min-h-screen bg-gray-50 max-w-5xl mx-auto w-full py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-      {/* Columna izquierda: Crew actual y pasados */}
+      {/* //? ======================================== */}
+      {/* //? COLUMNA IZQUIERDA: LISTA DE EQUIPOS */}
+      {/* //? ======================================== */}
       <div className="flex flex-col gap-6">
-        {/* Crew actual */}
+        {/* //? Sección 1: Equipo actual */}
         <h2 className="text-xl font-bold text-gray-700 mb-4">Equipo actual</h2>
         {!currentCrew ? (
           <div className="flex flex-col items-center justify-center py-8">
@@ -53,6 +78,7 @@ const WorkerTeam = () => {
               <span className="px-4 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">
                 Activo
               </span>
+              {/* //! Badge "Líder" si el usuario es el líder del equipo */}
               {currentCrew.leader === user._id && (
                 <span className="px-4 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700">
                   Líder
@@ -62,7 +88,7 @@ const WorkerTeam = () => {
           </div>
         )}
 
-        {/* Equipos pasados */}
+        {/* //? Sección 2: Equipos anteriores */}
         <h2 className="text-xl font-bold text-gray-700 mb-4">
           Equipos anteriores
         </h2>
@@ -92,7 +118,9 @@ const WorkerTeam = () => {
         )}
       </div>
 
-      {/* Columna derecha: Detalles del equipo seleccionado */}
+      {/* //? ======================================== */}
+      {/* //? COLUMNA DERECHA: DETALLES DEL EQUIPO */}
+      {/* //? ======================================== */}
       <div>
         <h2 className="text-xl font-bold text-gray-700 mb-4">
           Detalles del equipo
@@ -109,6 +137,7 @@ const WorkerTeam = () => {
               {selectedCrew.name}
             </h3>
 
+            {/* //? Líder del equipo */}
             <div className="mb-4">
               <span className="font-semibold text-gray-700 block mb-2">
                 Líder:
@@ -124,6 +153,7 @@ const WorkerTeam = () => {
               </div>
             </div>
 
+            {/* //? Miembros del equipo */}
             <div className="mb-4">
               <span className="font-semibold text-gray-700 block mb-2">
                 Miembros ({selectedCrew.members?.length || 0}):
@@ -152,6 +182,7 @@ const WorkerTeam = () => {
               </div>
             </div>
 
+            {/* //? Estado del equipo */}
             <div className="mb-2">
               <span className="font-semibold text-gray-700">Estado:</span>
               <span
@@ -163,6 +194,7 @@ const WorkerTeam = () => {
               </span>
             </div>
 
+            {/* //? ID del equipo */}
             <div className="mb-2">
               <span className="font-semibold text-gray-700">ID:</span>
               <span className="ml-2 text-gray-700 font-mono text-sm">
@@ -170,6 +202,7 @@ const WorkerTeam = () => {
               </span>
             </div>
 
+            {/* //? Fecha de finalización (si está inactivo) */}
             {selectedCrew.deleted_at && (
               <div className="mb-2 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                 <span className="font-semibold text-red-700 block mb-1">
@@ -195,3 +228,36 @@ const WorkerTeam = () => {
 };
 
 export default WorkerTeam;
+
+//* ========================================
+//* CONSTANTES EN ESPAÑOL
+//* ========================================
+/*
+ * WorkerTeam = equipo de trabajador
+ * getFetchData = obtener datos del fetch
+ * useFetch = usar fetch
+ * currentCrew = equipo actual
+ * setCurrentCrew = establecer equipo actual
+ * pastCrews = equipos pasados
+ * setPastCrews = establecer equipos pasados
+ * selectedCrew = equipo seleccionado
+ * setSelectedCrew = establecer equipo seleccionado
+ * user = usuario
+ * UserContext = contexto de usuario
+ * fetchCrews = obtener equipos
+ * data = datos
+ * crew = equipo
+ * error = error
+ * _id = identificador
+ * name = nombre
+ * leader = líder
+ * idx = índice
+ * members = miembros
+ * member = miembro
+ * profile = perfil
+ * first_name = primer nombre
+ * last_name = apellido
+ * username = nombre de usuario
+ * deleted_at = eliminado en (fecha)
+ * toLocaleDateString = a fecha local en cadena
+ */

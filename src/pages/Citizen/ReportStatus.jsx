@@ -1,3 +1,17 @@
+//* ========================================
+//* PÁGINA: ReportStatus
+//* ========================================
+//* Propósito: Lista de reportes del ciudadano con filtros y búsqueda
+//* Ruta: /citizen/reportstatus
+//* Layout: CitizenLayout
+//* Características:
+//*   - Muestra todos los reportes del usuario autenticado
+//*   - Filtros por estado (6 opciones + Todos)
+//*   - Búsqueda por título
+//*   - Click en reporte: abre panel de detalles
+//*   - Endpoint: /reports/author (reportes del usuario logueado por sesión)
+//*   - Si no hay reportes: enlace a /citizen/reports
+
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../../context/UserContext";
 import useFetch from "../../hooks/useFetch";
@@ -6,17 +20,28 @@ import { Link } from "react-router-dom";
 import ReportDetails from "../../components/details/ReportDetails";
 
 const ReportStatus = () => {
+  //* ========================================
+  //* CONTEXTO Y ESTADO
+  //* ========================================
   const { user } = useContext(UserContext);
   const { getFetchData } = useFetch();
+
+  //? Estado de reportes del usuario
   const [reports, setReports] = useState([]);
+  //? Reporte seleccionado para mostrar detalles
   const [selectedReport, setSelectedReport] = useState(null);
+  //? Filtro por estado (Todos, Pendiente, Revisado, etc.)
   const [filter, setFilter] = useState("Todos");
+  //? Búsqueda por título
   const [search, setSearch] = useState("");
 
+  //* ========================================
+  //* EFECTO: Cargar reportes del usuario
+  //* ========================================
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        // El backend ahora obtiene los reportes del usuario logueado por sesión
+        //! Endpoint que trae los reportes del usuario autenticado por sesión
         const data = await getFetchData("/reports/author");
         setReports(data.reports);
         console.log("Reportes obtenidos:", data.reports);
@@ -27,11 +52,18 @@ const ReportStatus = () => {
     fetchReports();
   }, [user]);
 
+  //* ========================================
+  //* HANDLERS
+  //* ========================================
+  //? Cerrar panel de detalles
   const closeModal = () => {
     setSelectedReport(null);
   };
 
-  // Filtros disponibles según los estados del backend
+  //* ========================================
+  //* OPCIONES DE FILTRO
+  //* ========================================
+  //? Opciones de estado según los estados del backend
   const statusOptions = [
     "Todos",
     "Pendiente",
@@ -41,14 +73,23 @@ const ReportStatus = () => {
     "Rechazado",
   ];
 
-  // Filtrar reportes según el filtro seleccionado y el buscador
+  //* ========================================
+  //* FILTRADO DE REPORTES
+  //* ========================================
+  //! Aplicar filtro por estado y búsqueda por título
   const filteredReports = (
     filter === "Todos" ? reports : reports.filter((r) => r.status === filter)
   ).filter((r) => r.title.toLowerCase().includes(search.toLowerCase()));
 
+  //* ========================================
+  //* RENDER
+  //* ========================================
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <div className="relative w-full flex-1">
+        {/* //? ======================================== */}
+        {/* //? HEADER - TÍTULO Y BÚSQUEDA */}
+        {/* //? ======================================== */}
         <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col gap-2">
           <h2 className="text-xl font-bold text-gray-700">Tus Reportes</h2>
           <input
@@ -59,7 +100,10 @@ const ReportStatus = () => {
             className="border rounded px-3 py-2 w-full max-w-md focus:outline-none focus:ring focus:border-blue-300"
           />
         </div>
-        {/* Mostrar siempre los botones de filtro */}
+
+        {/* //? ======================================== */}
+        {/* //? BOTONES DE FILTRO POR ESTADO */}
+        {/* //? ======================================== */}
         <div className="max-w-4xl mx-auto px-4 pb-4 flex gap-2">
           {statusOptions.map((option) => (
             <button
@@ -76,8 +120,13 @@ const ReportStatus = () => {
             </button>
           ))}
         </div>
+
+        {/* //? ======================================== */}
+        {/* //? LISTA DE REPORTES */}
+        {/* //? ======================================== */}
         <div className="space-y-4">
           {filteredReports.length === 0 ? (
+            //! Si no hay reportes, mostrar mensaje y enlace
             <div className="flex flex-col items-center justify-center py-16">
               <h3>¡Haz tu primer reporte!</h3>
               <Link to="/citizen/reports" className="border">
@@ -85,6 +134,7 @@ const ReportStatus = () => {
               </Link>
             </div>
           ) : (
+            //? Renderizar cada reporte como tarjeta clickeable
             filteredReports.map((reporte, idx) => (
               <div
                 key={idx}
@@ -96,6 +146,7 @@ const ReportStatus = () => {
                     {reporte.title}
                   </span>
                 </div>
+                {/* //? Badge de estado con colores según status */}
                 <span
                   className={`px-5 py-2 rounded-full text-base font-medium 
                     ${
@@ -112,6 +163,10 @@ const ReportStatus = () => {
               </div>
             ))
           )}
+
+          {/* //? ======================================== */}
+          {/* //? PANEL DE DETALLES (MODAL) */}
+          {/* //? ======================================== */}
           {selectedReport && (
             <ReportDetails report={selectedReport} onClose={closeModal} />
           )}
@@ -122,3 +177,40 @@ const ReportStatus = () => {
 };
 
 export default ReportStatus;
+
+//* ========================================
+//* CONSTANTES EN ESPAÑOL
+//* ========================================
+/*
+ * ReportStatus = estado de reporte
+ * user = usuario
+ * UserContext = contexto de usuario
+ * getFetchData = obtener datos del fetch
+ * useFetch = usar fetch
+ * reports = reportes
+ * setReports = establecer reportes
+ * selectedReport = reporte seleccionado
+ * setSelectedReport = establecer reporte seleccionado
+ * filter = filtro
+ * setFilter = establecer filtro
+ * search = búsqueda
+ * setSearch = establecer búsqueda
+ * fetchReports = obtener reportes
+ * data = datos
+ * error = error
+ * closeModal = cerrar modal
+ * statusOptions = opciones de estado
+ * filteredReports = reportes filtrados
+ * r = reporte (abreviatura)
+ * status = estado
+ * title = título
+ * toLowerCase = a minúsculas
+ * includes = incluye
+ * e = evento
+ * option = opción
+ * reporte = reporte
+ * idx = índice
+ * ReportDetails = detalles de reporte
+ * report = reporte
+ * onClose = al cerrar
+ */

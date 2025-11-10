@@ -1,84 +1,157 @@
+//! ========================================
+//! OPERATOR CREATE TEAMS - CREAR CUADRILLAS CON LÍDER Y MIEMBROS
+//! ========================================
+//* Propósito: Página para crear nuevas cuadrillas seleccionando un líder y miembros de trabajadores
+//* Ruta: /operator/create-team
+//* Layout: OperatorLayout (con OperatorNavBar)
+//* Endpoint: GET /user/workers - Obtiene lista de trabajadores disponibles
+//*           POST /crew - Crea nueva cuadrilla con nombre, líder y miembros
+//* Características:
+//*   - Dos columnas: Trabajadores disponibles (izquierda) y Formulario (derecha)
+//*   - Selección única de líder (obligatorio)
+//*   - Selección múltiple de miembros (opcional)
+//*   - Búsqueda por username de trabajador
+//*   - Validación: líder no puede ser miembro y viceversa
+
 import { useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import useFilter from "../../hooks/useFilter";
 
-//Esto fue full IA no entiendo ni un poco
-
+//? ========================================
+//? COMPONENTE PRINCIPAL - OPERATORCREATETEAMS
+//? ========================================
+//* Descripción: Permite crear cuadrillas asignando un líder y miembros desde lista de trabajadores
+//* @returns {JSX.Element} - Vista con 2 columnas (trabajadores + formulario)
+//* Uso: Operadores crean cuadrillas para asignarles tareas
 const OperatorCreateTeams = () => {
   const { getFetchData, postFetchLocalStorage } = useFetch();
-  const [workers, setWorkers] = useState([]);
-  const [search, setSearch] = useState("");
-  const { filterBySearch } = useFilter();
-  const [name, setName] = useState("");
-  const [leader, setLeader] = useState(null); // id del líder
-  const [members, setMembers] = useState([]); // ids de los miembros
-  const [selectingLeader, setSelectingLeader] = useState(false);
-  const [selectingMembers, setSelectingMembers] = useState(false);
 
+  //? Estados para datos desde el backend
+  const [workers, setWorkers] = useState([]); //* Lista de todos los trabajadores disponibles
+
+  //? Estados para búsqueda
+  const [search, setSearch] = useState(""); //* Búsqueda por username
+  const { filterBySearch } = useFilter();
+
+  //? Estados para formulario de creación
+  const [name, setName] = useState(""); //* Nombre de la cuadrilla
+  const [leader, setLeader] = useState(null); //* ID del líder seleccionado (único, obligatorio)
+  const [members, setMembers] = useState([]); //* Array de IDs de miembros seleccionados (opcional)
+
+  //? Estados para controlar secciones de selección
+  const [selectingLeader, setSelectingLeader] = useState(false); //* Muestra/oculta sección de selección de líder
+  const [selectingMembers, setSelectingMembers] = useState(false); //* Muestra/oculta sección de selección de miembros
+
+  //? ========================================
+  //? EFFECT: CARGAR LISTA DE TRABAJADORES
+  //? ========================================
+  //* Se ejecuta al montar el componente
+  //* Obtiene todos los trabajadores disponibles para formar cuadrillas
   useEffect(() => {
     const fetchWorkers = async () => {
       try {
+        //? Llama al endpoint para obtener trabajadores con role="Trabajador"
         const data = await getFetchData("/user/workers");
         console.log(data);
+        //? Actualiza estado con lista de trabajadores
         setWorkers(data.workers);
       } catch (error) {
         console.error("Error al obtener los trabajadores:", error);
       }
     };
     fetchWorkers();
-  }, []);
+  }, []); //* Solo se ejecuta una vez al montar
 
-  // Selección de líder (solo uno)
+  //? ========================================
+  //? HANDLERS: SELECCIÓN DE LÍDER
+  //? ========================================
+
+  //* Selecciona un trabajador como líder de la cuadrilla
+  //* @param {String} workerId - ID del trabajador a seleccionar como líder
   const handleLeaderSelect = (workerId) => {
-    setLeader(workerId);
-    setSelectingLeader(false);
-    // Si estaba como miembro, lo quitamos de miembros
+    setLeader(workerId); //* Establece el líder
+    setSelectingLeader(false); //* Cierra la sección de selección
+    //? Si el trabajador estaba como miembro, lo quita de miembros (no puede ser ambos)
     setMembers((prev) => prev.filter((id) => id !== workerId));
   };
 
+  //* Remueve el líder seleccionado
   const handleRemoveLeader = () => {
     setLeader(null);
   };
 
-  // Selección de miembros (varios, no puede ser el líder)
+  //? ========================================
+  //? HANDLERS: SELECCIÓN DE MIEMBROS
+  //? ========================================
+
+  //* Selecciona/deselecciona un trabajador como miembro
+  //* @param {String} workerId - ID del trabajador a seleccionar/deseleccionar
   const handleMemberSelect = (workerId) => {
+    //? Previene que el líder sea agregado como miembro
     if (workerId === leader) return;
-    setMembers((prev) =>
-      prev.includes(workerId)
-        ? prev.filter((id) => id !== workerId)
-        : [...prev, workerId]
+    //? Toggle: si ya está, lo quita; si no, lo agrega
+    setMembers(
+      (prev) =>
+        prev.includes(workerId)
+          ? prev.filter((id) => id !== workerId) //* Quita del array
+          : [...prev, workerId] //* Agrega al array
     );
   };
 
+  //? ========================================
+  //? HANDLER: ENVIAR FORMULARIO
+  //? ========================================
+
+  //* Envía la nueva cuadrilla al backend y resetea el formulario
   const handleSubmit = () => {
+    //? Construye payload con datos de la cuadrilla
     const payload = {
-      name,
-      leader,
-      members,
+      name, //* Nombre de la cuadrilla
+      leader, //* ID del líder
+      members, //* Array de IDs de miembros
     };
     console.log("Payload para crear equipo:", payload);
+    //? Envía POST a /crew
     postFetchLocalStorage("/crew", payload);
+    //? Resetea formulario después de crear
     setMembers([]);
     setLeader(null);
     setName("");
   };
 
-  // Filtrar trabajadores por username antes del render
+  //? ========================================
+  //? FILTROS: BÚSQUEDA DE TRABAJADORES
+  //? ========================================
+  //* Filtra trabajadores por username usando el hook useFilter
   const filteredWorkers = filterBySearch(workers, search, "username");
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
+      {/* ========================================
+          SECCIÓN: HEADER
+          ======================================== */}
       <div className="max-w-5xl mx-auto px-4 py-4 flex flex-col items-center">
         <h2 className="text-xl font-bold text-gray-700">
           Equipos y Trabajadores
         </h2>
       </div>
+
+      {/* ========================================
+          SECCIÓN: DOS COLUMNAS (TRABAJADORES + FORMULARIO)
+          ======================================== */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto w-full">
-        {/* Columna de trabajadores disponibles */}
+        {/* ========================================
+            COLUMNA IZQUIERDA: TRABAJADORES DISPONIBLES
+            ======================================== 
+            * Lista de trabajadores filtrados por búsqueda
+            * Al hacer clic, se agregan como miembros (columna izquierda)
+            * Muestra username y rol
+        */}
         <div>
           <h3 className="text-lg font-semibold text-blue-700 mb-4">
             Trabajadores disponibles
           </h3>
+          {/* Input de búsqueda por username */}
           <input
             type="text"
             placeholder="Buscar trabajador..."
@@ -86,18 +159,18 @@ const OperatorCreateTeams = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          {/* Lista de trabajadores filtrados por username */}
+          {/* Lista de trabajadores filtrados */}
           {filteredWorkers.length > 0 ? (
             filteredWorkers.map((worker) => (
               <div
                 key={worker._id}
                 className={`bg-white rounded-lg shadow p-3 flex flex-col border w-full mb-3 min-h-14 hover:cursor-pointer ${
                   members.includes(worker._id)
-                    ? "border-blue-500 ring-2 ring-blue-300"
-                    : "border-gray-200"
+                    ? "border-blue-500 ring-2 ring-blue-300" //* Estilo cuando está seleccionado como miembro
+                    : "border-gray-200" //* Estilo por defecto
                 }`}
                 onClick={() => {
-                  handleMemberSelect(worker._id);
+                  handleMemberSelect(worker._id); //* Agregar/quitar como miembro
                 }}
               >
                 <span className="block text-base font-semibold text-gray-800">
@@ -112,12 +185,18 @@ const OperatorCreateTeams = () => {
             <div className="py-2">No hay trabajadores disponibles</div>
           )}
         </div>
-        {/* Columna del formulario para crear crew */}
+
+        {/* ========================================
+            COLUMNA DERECHA: FORMULARIO CREAR CUADRILLA
+            ======================================== */}
         <div>
           <h3 className="text-lg font-semibold text-indigo-700 mb-4">
             Crear nuevo equipo
           </h3>
-          {/* Input para nombre */}
+
+          {/* ========================================
+              CAMPO: NOMBRE DEL EQUIPO
+              ======================================== */}
           <div className="mb-6">
             <label className="block font-medium mb-2">Nombre del equipo</label>
             <input
@@ -128,10 +207,19 @@ const OperatorCreateTeams = () => {
               placeholder="Ingrese el nombre del equipo"
             />
           </div>
-          {/* Selección de líder */}
+
+          {/* ========================================
+              CAMPO: SELECCIÓN DE LÍDER (ÚNICO)
+              ======================================== 
+              * Botón "Seleccionar" abre grid de trabajadores
+              * Solo uno puede ser líder
+              * Muestra nombre del líder seleccionado
+              * Botón "Eliminar" para quitar líder
+          */}
           <div className="mb-6">
             <label className="block font-medium mb-2">Seleccione líder</label>
             <div className="flex items-center gap-2 mb-2">
+              {/* Botón para seleccionar o eliminar líder */}
               <button
                 type="button"
                 className={`px-4 py-2 rounded font-medium transition-colors duration-150 ${
@@ -143,25 +231,27 @@ const OperatorCreateTeams = () => {
               >
                 {leader ? "Eliminar" : "Seleccionar"}
               </button>
+              {/* Muestra nombre del líder si está seleccionado */}
               {leader && (
                 <span className="ml-2 font-semibold text-blue-700">
                   {workers.find((w) => w._id === leader)?.username}
                 </span>
               )}
             </div>
+            {/* Grid de trabajadores para seleccionar líder */}
             {selectingLeader && (
               <div className="flex flex-wrap gap-2 mt-2">
                 {workers.length > 0 ? (
                   workers
-                    .filter((w) => !members.includes(w._id))
+                    .filter((w) => !members.includes(w._id)) //* Excluye a los que ya son miembros
                     .map((worker) => (
                       <div
                         key={worker._id}
                         className={`bg-white rounded-lg shadow p-3 flex flex-col border hover:cursor-pointer min-w-[140px] min-h-14 text-center transition-all
                         ${
                           leader === worker._id
-                            ? "border-red-600 ring-2 ring-red-400"
-                            : "border-gray-200"
+                            ? "border-red-600 ring-2 ring-red-400" //* Estilo cuando es el líder
+                            : "border-gray-200" //* Estilo por defecto
                         }
                       `}
                         onClick={() => handleLeaderSelect(worker._id)}
@@ -180,12 +270,21 @@ const OperatorCreateTeams = () => {
               </div>
             )}
           </div>
-          {/* Selección de miembros */}
+
+          {/* ========================================
+              CAMPO: SELECCIÓN DE MIEMBROS (MÚLTIPLES)
+              ======================================== 
+              * Botón "Seleccionar" abre grid de trabajadores
+              * Permite seleccionar varios miembros
+              * No puede incluir al líder
+              * Muestra badges con nombres de miembros seleccionados
+          */}
           <div className="mb-6">
             <label className="block font-medium mb-2">
               Seleccione miembros
             </label>
             <div className="flex items-center gap-2 mb-2">
+              {/* Botón para toggle sección de selección */}
               <button
                 type="button"
                 className="px-4 py-2 rounded font-medium transition-colors duration-150 bg-blue-600 text-white"
@@ -193,6 +292,7 @@ const OperatorCreateTeams = () => {
               >
                 Seleccionar
               </button>
+              {/* Badges con nombres de miembros seleccionados */}
               {members.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {members.map((id) => (
@@ -206,19 +306,20 @@ const OperatorCreateTeams = () => {
                 </div>
               )}
             </div>
+            {/* Grid de trabajadores para seleccionar miembros */}
             {selectingMembers && (
               <div className="flex flex-wrap gap-2 mt-2">
                 {workers.length > 0 ? (
                   workers
-                    .filter((w) => w._id !== leader)
+                    .filter((w) => w._id !== leader) //* Excluye al líder (no puede ser miembro)
                     .map((worker) => (
                       <div
                         key={worker._id}
                         className={`bg-white rounded-lg shadow p-3 flex flex-col border hover:cursor-pointer min-w-[140px] min-h-14 text-center transition-all
                         ${
                           members.includes(worker._id)
-                            ? "border-blue-500 ring-2 ring-blue-300"
-                            : "border-gray-200"
+                            ? "border-blue-500 ring-2 ring-blue-300" //* Estilo cuando está seleccionado
+                            : "border-gray-200" //* Estilo por defecto
                         }
                       `}
                         onClick={() => handleMemberSelect(worker._id)}
@@ -237,7 +338,10 @@ const OperatorCreateTeams = () => {
               </div>
             )}
           </div>
-          {/* Aquí luego irá el resto del formulario (submit, etc) */}
+
+          {/* ========================================
+              BOTÓN: CREAR EQUIPO
+              ======================================== */}
           <div className="flex justify-end">
             <button
               type="button"
@@ -254,3 +358,19 @@ const OperatorCreateTeams = () => {
 };
 
 export default OperatorCreateTeams;
+
+//! ========================================
+//! TRADUCCIÓN DE CONSTANTES
+//! ========================================
+//* workers - trabajadores
+//* search - búsqueda
+//* name - nombre
+//* leader - líder
+//* members - miembros
+//* selectingLeader - seleccionando líder
+//* selectingMembers - seleccionando miembros
+//* handleLeaderSelect - manejar selección de líder
+//* handleRemoveLeader - manejar eliminación de líder
+//* handleMemberSelect - manejar selección de miembro
+//* handleSubmit - manejar envío
+//* filteredWorkers - trabajadores filtrados

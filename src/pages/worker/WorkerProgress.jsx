@@ -1,3 +1,23 @@
+//* ========================================
+//* PÁGINA: WorkerProgress
+//* ========================================
+//* Propósito: Formulario para trabajadores registren avances de tareas
+//* Características:
+//*   - Solo puede reportar progreso de tarea actualmente "En Progreso"
+//*   - Subida de imágenes (hasta 5, 15MB c/u)
+//*   - Selección de ubicación en mapa
+//*   - Estados: En Progreso, Finalizado
+//*   - Al marcar "Finalizado": completa automáticamente TODOS los reportes asociados
+//*   - Validación de ubicación obligatoria
+//* Campos:
+//*   - title: Título del avance
+//*   - description: Descripción del trabajo realizado
+//*   - status: Estado (En Progreso / Finalizado)
+//*   - location: { lat, lng }
+//*   - images: Array de archivos (opcional)
+//*   - task: ID de la tarea (automático)
+//*   - crew: ID de la cuadrilla (automático)
+
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import useFetch from "../../hooks/useFetch";
@@ -8,20 +28,29 @@ import "leaflet/dist/leaflet.css";
 
 const WorkerProgress = () => {
   const { getFetchData, postFetchFormData } = useFetch();
-  const [currentTask, setCurrentTask] = useState(null);
-  const [markerPosition, setMarkerPosition] = useState(null);
-  const [crew, setCrew] = useState(null);
-  const [selectedImages, setSelectedImages] = useState([]);
+
+  //* Estados locales
+  const [currentTask, setCurrentTask] = useState(null); // Tarea actual "En Progreso"
+  const [markerPosition, setMarkerPosition] = useState(null); // [lat, lng]
+  const [crew, setCrew] = useState(null); // Cuadrilla del trabajador
+  const [selectedImages, setSelectedImages] = useState([]); // Imágenes seleccionadas
+
   const { register, handleSubmit, reset, formState } = useForm();
   const { errors } = formState;
 
+  //* ========================================
+  //* USEEFFECT: Cargar tarea actual al montar componente
+  //* ========================================
+  //* Busca la tarea que está "En Progreso" del trabajador
   useEffect(() => {
     let isMounted = true;
 
     const fetchCurrentTask = async () => {
       try {
+        //* GET /task/worker retorna { tasks: [], crew: {} }
         const data = await getFetchData("/task/worker");
         if (isMounted) {
+          //? Buscar la primera tarea con status "En Progreso"
           const taskInProgress = data.tasks.find(
             (t) => t.status === "En Progreso"
           );
@@ -38,59 +67,73 @@ const WorkerProgress = () => {
 
     fetchCurrentTask();
 
+    //* Cleanup: Prevenir actualizaciones de estado en componente desmontado
     return () => {
       isMounted = false;
     };
   }, []);
 
+  //* Callback para recibir imágenes del ImageUploader
   const handleImagesChange = (files) => {
     setSelectedImages(files);
   };
 
+  //* ========================================
+  //* FUNCIÓN: onSubmit
+  //* ========================================
+  //* Propósito: Enviar reporte de progreso al backend
   const onSubmit = async (data) => {
+    //! VALIDACIÓN: Verificar ubicación
     if (!markerPosition) {
       alert("Por favor, marca tu ubicación en el mapa");
       return;
     }
 
-    // Confirmación especial si se marca como Finalizado
+    //! CONFIRMACIÓN ESPECIAL: Si se marca como "Finalizado"
+    //* Esto es crítico porque completa TODOS los reportes de la tarea
     if (data.status === "Finalizado") {
       const confirmacion = window.confirm(
         "¿Estás seguro de marcar esta tarea como FINALIZADA? Esto completará automáticamente todos los reportes asociados."
       );
       if (!confirmacion) {
-        return;
+        return; // Usuario canceló
       }
     }
 
     const [lat, lng] = markerPosition;
 
-    // Construir FormData
+    //* ========================================
+    //* CONSTRUIR FORMDATA
+    //* ========================================
     const formData = new FormData();
     formData.append("title", data.title);
     formData.append("description", data.description);
     formData.append("status", data.status);
-    formData.append("task", currentTask._id);
-    formData.append("crew", crew._id);
+    formData.append("task", currentTask._id); // ID de la tarea
+    formData.append("crew", crew._id); // ID de la cuadrilla
     formData.append("location[lat]", lat);
     formData.append("location[lng]", lng);
 
-    // Agregar imágenes
+    //* Agregar imágenes
     selectedImages.forEach((file) => {
       formData.append("images", file);
     });
 
     try {
+      //* Enviar reporte de progreso
       await postFetchFormData("/progress-report", formData);
+
+      //* Resetear formulario y estados
       reset();
       setMarkerPosition(null);
       setSelectedImages([]);
 
+      //? Mensajes y redirección según el estado
       if (data.status === "Finalizado") {
         alert(
           "✅ Tarea finalizada exitosamente. Todos los reportes asociados han sido completados."
         );
-        // Redirigir a tareas después de 2 segundos
+        //* Redirigir a /worker/tasks después de 2 segundos
         setTimeout(() => {
           window.location.href = "/worker/tasks";
         }, 2000);
@@ -214,8 +257,9 @@ const WorkerProgress = () => {
                 Ubicación actual
               </label>
               <div className="w-full h-96 border rounded-lg overflow-hidden">
+                //* Mapa Leaflet: Centrado en Formosa capital
                 <MapContainer
-                  center={[-26.1849, -58.1756]}
+                  center={[-26.1849, -58.1756]} // Coordenadas de Formosa
                   zoom={15}
                   scrollWheelZoom={true}
                   className="w-full h-full"
@@ -224,7 +268,9 @@ const WorkerProgress = () => {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
+                  {/* MapClickHandler: Captura clicks en el mapa */}
                   <MapClickHandler onClickPosition={setMarkerPosition} />
+                  {/* Mostrar marcador si hay posición seleccionada */}
                   {markerPosition && (
                     <Marker position={markerPosition}>
                       <Popup>Ubicación seleccionada</Popup>
@@ -232,6 +278,7 @@ const WorkerProgress = () => {
                   )}
                 </MapContainer>
               </div>
+              {/* Mostrar coordenadas seleccionadas */}
               {markerPosition && (
                 <p className="text-sm text-gray-600 mt-2">
                   Coordenadas: {markerPosition[0].toFixed(4)},{" "}
@@ -240,6 +287,7 @@ const WorkerProgress = () => {
               )}
             </div>
 
+            {/* Botones de acción */}
             <div className="flex justify-end gap-4 pt-4">
               <button
                 type="button"
@@ -266,3 +314,42 @@ const WorkerProgress = () => {
 };
 
 export default WorkerProgress;
+
+//* ========================================
+//* CONSTANTES EN ESPAÑOL
+//* ========================================
+/*
+ * currentTask = tarea actual
+ * setCurrentTask = establecer tarea actual
+ * markerPosition = posición del marcador
+ * setMarkerPosition = establecer posición del marcador
+ * crew = cuadrilla
+ * setCrew = establecer cuadrilla
+ * selectedImages = imágenes seleccionadas
+ * setSelectedImages = establecer imágenes seleccionadas
+ * register = registrar
+ * handleSubmit = manejar envío
+ * reset = resetear
+ * formState = estado del formulario
+ * errors = errores
+ * getFetchData = obtener datos
+ * postFetchFormData = enviar datos con archivos
+ * isMounted = está montado
+ * fetchCurrentTask = obtener tarea actual
+ * tasks = tareas
+ * taskInProgress = tarea en progreso
+ * status = estado
+ * handleImagesChange = manejar cambio de imágenes
+ * files = archivos
+ * onSubmit = al enviar
+ * data = datos
+ * confirmacion = confirmación
+ * lat = latitud
+ * lng = longitud
+ * formData = datos del formulario
+ * title = título
+ * description = descripción
+ * task = tarea
+ * location = ubicación
+ * images = imágenes
+ */

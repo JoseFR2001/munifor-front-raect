@@ -1,8 +1,30 @@
+//* ========================================
+//* COMPONENTE: CreateTaskModal
+//* ========================================
+//* Propósito: Modal para crear tarea asignando cuadrilla y reportes
+//* Usado en: OperatorNewReports.jsx, OperatorCreateTask.jsx
+//* Props:
+//*   - onClose: función - Cerrar el modal
+//*   - onSubmit: función - Enviar datos de la nueva tarea
+//*   - crewSelected: string - ID de la cuadrilla seleccionada
+//*   - reportSelected: array - IDs de reportes a asociar con la tarea
+//* Campos del formulario:
+//*   - title: string - Título de la tarea
+//*   - taskType: enum - Tipo ("Reparación", "Mantenimiento", "Recolección", "Supervisión")
+//*   - priority: enum - Prioridad ("Alta", "Media", "Baja")
+//*   - location: objeto - Coordenadas {lat, lng} seleccionadas en mapa
+//* Validación:
+//*   - Todos los campos son obligatorios
+//*   - Debe seleccionar ubicación en el mapa
+//*   - Debe haber al menos 1 reporte seleccionado
+//*   - Debe haber una cuadrilla seleccionada
+
 import { useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import MapClickHandler from "./LeafletMaps/MapClick";
 import "leaflet/dist/leaflet.css";
 
+//* Constantes de opciones
 const TASK_TYPES = [
   "Reparación",
   "Mantenimiento",
@@ -17,15 +39,20 @@ const CreateTaskModal = ({
   crewSelected,
   reportSelected,
 }) => {
+  //* Estados locales del formulario
   const [title, setTitle] = useState("");
   const [taskType, setTaskType] = useState("");
   const [priority, setPriority] = useState("");
-  const [markerPosition, setMarkerPosition] = useState(null);
+  const [markerPosition, setMarkerPosition] = useState(null); // [lat, lng]
   const [error, setError] = useState("");
 
+  //* ========================================
+  //* SUBMIT: Validar y enviar tarea
+  //* ========================================
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Validación básica
+
+    //! Validación: Todos los campos obligatorios
     if (
       !title ||
       !taskType ||
@@ -39,11 +66,17 @@ const CreateTaskModal = ({
       );
       return;
     }
+
+    //! Validación: Debe marcar ubicación en el mapa
     if (!markerPosition) {
       setError("Por favor, marca la ubicación de la tarea en el mapa.");
       return;
     }
+
+    //* Limpiar errores
     setError("");
+
+    //* Construir payload
     const [lat, lng] = markerPosition;
     const payload = {
       title,
@@ -53,15 +86,19 @@ const CreateTaskModal = ({
       task_type: taskType,
       location: { lat, lng },
     };
+
+    //! Enviar y cerrar modal
     if (onSubmit) onSubmit(payload);
     onClose();
   };
 
   return (
+    //* Backdrop: Click cierra el modal
     <div
       className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50 overflow-y-auto"
       onClick={onClose}
     >
+      {/* //! Card principal con scroll vertical */}
       <div
         className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl flex flex-col items-center justify-center p-0 my-8"
         onClick={(e) => e.stopPropagation()}
@@ -73,7 +110,13 @@ const CreateTaskModal = ({
           <h1 className="text-2xl font-bold text-gray-900 mb-4 text-center">
             Crear tarea
           </h1>
+
+          {/* //! Mensaje de error */}
           {error && <div className="text-red-600 mb-2 text-sm">{error}</div>}
+
+          {/* //? ======================================== */}
+          {/* //? CAMPO: Título */}
+          {/* //? ======================================== */}
           <div className="mb-4 w-full">
             <label
               htmlFor="title"
@@ -89,6 +132,10 @@ const CreateTaskModal = ({
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
+
+          {/* //? ======================================== */}
+          {/* //? CAMPO: Tipo de tarea */}
+          {/* //? ======================================== */}
           <div className="mb-4 w-full">
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Tipo de tarea
@@ -106,6 +153,10 @@ const CreateTaskModal = ({
               ))}
             </select>
           </div>
+
+          {/* //? ======================================== */}
+          {/* //? CAMPO: Prioridad */}
+          {/* //? ======================================== */}
           <div className="mb-4 w-full">
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Prioridad
@@ -124,14 +175,17 @@ const CreateTaskModal = ({
             </select>
           </div>
 
-          {/* Mapa para seleccionar ubicación */}
+          {/* //? ======================================== */}
+          {/* //! CAMPO: Ubicación (Mapa interactivo) */}
+          {/* //? ======================================== */}
           <div className="mb-4 w-full">
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Ubicación de la tarea
             </label>
+            {/* //! Mapa de Leaflet: Click en el mapa setea markerPosition */}
             <div className="w-full h-96 border rounded-lg overflow-hidden">
               <MapContainer
-                center={[-26.1849, -58.1756]}
+                center={[-26.1849, -58.1756]} // Centro: Formosa, Argentina
                 zoom={15}
                 scrollWheelZoom={true}
                 className="w-full h-full"
@@ -140,7 +194,9 @@ const CreateTaskModal = ({
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
+                {/* //! MapClickHandler: Captura click y actualiza markerPosition */}
                 <MapClickHandler onClickPosition={setMarkerPosition} />
+                {/* //? Marker: Se muestra solo si hay posición seleccionada */}
                 {markerPosition && (
                   <Marker position={markerPosition}>
                     <Popup>Ubicación de la tarea</Popup>
@@ -148,6 +204,7 @@ const CreateTaskModal = ({
                 )}
               </MapContainer>
             </div>
+            {/* //? Mostrar coordenadas seleccionadas */}
             {markerPosition && (
               <p className="text-sm text-gray-600 mt-2">
                 Coordenadas: {markerPosition[0].toFixed(4)},{" "}
@@ -156,6 +213,9 @@ const CreateTaskModal = ({
             )}
           </div>
 
+          {/* //? ======================================== */}
+          {/* //? BOTONES DE ACCIÓN */}
+          {/* //? ======================================== */}
           <div className="flex justify-end w-full gap-2">
             <button
               type="button"
@@ -164,6 +224,7 @@ const CreateTaskModal = ({
             >
               Cancelar
             </button>
+            {/* //! Botón de submit */}
             <button
               type="submit"
               className="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700 transition"
@@ -178,3 +239,25 @@ const CreateTaskModal = ({
 };
 
 export default CreateTaskModal;
+
+//* ========================================
+//* CONSTANTES EN ESPAÑOL
+//* ========================================
+/*
+ * CreateTaskModal = modal de crear tarea
+ * onClose = al cerrar
+ * onSubmit = al enviar
+ * crewSelected = cuadrilla seleccionada
+ * reportSelected = reporte(s) seleccionado(s)
+ * title = título
+ * taskType = tipo de tarea
+ * priority = prioridad
+ * markerPosition = posición del marcador
+ * error = error
+ * handleSubmit = manejar envío
+ * payload = carga útil / datos a enviar
+ * lat = latitud
+ * lng = longitud
+ * TASK_TYPES = tipos de tarea
+ * PRIORITIES = prioridades
+ */

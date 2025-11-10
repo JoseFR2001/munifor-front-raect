@@ -1,17 +1,37 @@
+//* ========================================
+//* PÁGINA: WorkerProgressHistory
+//* ========================================
+//* Propósito: Historial de avances reportados por el trabajador
+//* Ruta: /worker/progress-history
+//* Layout: WorkerLayout
+//* Características:
+//*   - Columna izquierda: Lista de avances con buscador
+//*   - Columna derecha: Detalles del avance seleccionado
+//*   - Endpoint: /progress-report/leader (avances del trabajador)
+//*   - Búsqueda por título con useFilter.filterBySearch
+//*   - Muestra: tarea asociada, equipo, ubicación, fechas
+
 import { useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import useFilter from "../../hooks/useFilter";
 
 const WorkerProgressHistory = () => {
+  //* ========================================
+  //* ESTADO
+  //* ========================================
   const { getFetchData } = useFetch();
   const { filterBySearch } = useFilter();
   const [progressReports, setProgressReports] = useState([]);
   const [selectedProgress, setSelectedProgress] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
+  //* ========================================
+  //* EFECTO: Cargar avances al montar
+  //* ========================================
   useEffect(() => {
     const fetchProgressReports = async () => {
       try {
+        //! Endpoint que trae los avances del trabajador
         const data = await getFetchData("/progress-report/leader");
         setProgressReports(data.progress_reports || []);
       } catch (error) {
@@ -22,18 +42,25 @@ const WorkerProgressHistory = () => {
     fetchProgressReports();
   }, []);
 
-  // Filtrar reportes de progreso por título
+  //* ========================================
+  //* FILTRADO: Buscar avances por título
+  //* ========================================
   const filteredReports = filterBySearch(progressReports, searchTerm, "title");
 
+  //* ========================================
+  //* RENDER
+  //* ========================================
   return (
     <div className="min-h-screen bg-gray-50 max-w-5xl mx-auto w-full py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-      {/* Columna izquierda: Lista de reportes de progreso */}
+      {/* //? ======================================== */}
+      {/* //? COLUMNA IZQUIERDA: LISTA DE AVANCES */}
+      {/* //? ======================================== */}
       <div className="flex flex-col gap-4">
         <h2 className="text-xl font-bold text-gray-700 mb-2">
           Historial de avances
         </h2>
 
-        {/* Buscador */}
+        {/* //? Buscador */}
         <div className="mb-4">
           <input
             type="text"
@@ -44,7 +71,7 @@ const WorkerProgressHistory = () => {
           />
         </div>
 
-        {/* Lista de reportes */}
+        {/* //? Lista de reportes de progreso */}
         {filteredReports.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8">
             <span className="text-gray-500">
@@ -69,6 +96,7 @@ const WorkerProgressHistory = () => {
                   {progress.title}
                 </h3>
                 <div className="flex items-center justify-between">
+                  {/* //? Badge de estado con colores */}
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${
                       progress.status === "Finalizado"
@@ -80,6 +108,7 @@ const WorkerProgressHistory = () => {
                   >
                     {progress.status}
                   </span>
+                  {/* //? Fecha de creación */}
                   <span className="text-xs text-gray-500">
                     {new Date(progress.created_at).toLocaleDateString("es-ES")}
                   </span>
@@ -90,7 +119,9 @@ const WorkerProgressHistory = () => {
         )}
       </div>
 
-      {/* Columna derecha: Detalles del reporte seleccionado */}
+      {/* //? ======================================== */}
+      {/* //? COLUMNA DERECHA: DETALLES DEL AVANCE */}
+      {/* //? ======================================== */}
       <div>
         <h2 className="text-xl font-bold text-gray-700 mb-4">
           Detalle del avance
@@ -107,6 +138,7 @@ const WorkerProgressHistory = () => {
               {selectedProgress.title}
             </h3>
 
+            {/* //? Descripción */}
             <div className="mb-4">
               <span className="font-semibold text-gray-700 block mb-1">
                 Descripción:
@@ -114,6 +146,7 @@ const WorkerProgressHistory = () => {
               <p className="text-gray-600">{selectedProgress.description}</p>
             </div>
 
+            {/* //? Estado */}
             <div className="mb-4">
               <span className="font-semibold text-gray-700">Estado:</span>
               <span
@@ -129,6 +162,7 @@ const WorkerProgressHistory = () => {
               </span>
             </div>
 
+            {/* //? Tarea asociada */}
             <div className="mb-4">
               <span className="font-semibold text-gray-700 block mb-1">
                 Tarea asociada:
@@ -143,6 +177,7 @@ const WorkerProgressHistory = () => {
               </div>
             </div>
 
+            {/* //? Equipo */}
             <div className="mb-4">
               <span className="font-semibold text-gray-700 block mb-1">
                 Equipo:
@@ -157,6 +192,7 @@ const WorkerProgressHistory = () => {
               </div>
             </div>
 
+            {/* //? Ubicación (si existe) */}
             {selectedProgress.location?.lat &&
               selectedProgress.location?.lng && (
                 <div className="mb-4">
@@ -174,6 +210,7 @@ const WorkerProgressHistory = () => {
                 </div>
               )}
 
+            {/* //? Fecha de creación */}
             <div className="mb-2">
               <span className="font-semibold text-gray-700 block mb-1">
                 Fecha de creación:
@@ -189,6 +226,7 @@ const WorkerProgressHistory = () => {
               </p>
             </div>
 
+            {/* //? Última actualización (si es diferente de created_at) */}
             {selectedProgress.updated_at &&
               selectedProgress.updated_at !== selectedProgress.created_at && (
                 <div className="mb-2">
@@ -210,6 +248,7 @@ const WorkerProgressHistory = () => {
                 </div>
               )}
 
+            {/* //? ID del avance */}
             <div className="mb-2 mt-4">
               <span className="font-semibold text-gray-700">ID:</span>
               <span className="ml-2 text-gray-700 font-mono text-sm">
@@ -224,3 +263,43 @@ const WorkerProgressHistory = () => {
 };
 
 export default WorkerProgressHistory;
+
+//* ========================================
+//* CONSTANTES EN ESPAÑOL
+//* ========================================
+/*
+ * WorkerProgressHistory = historial de avances de trabajador
+ * getFetchData = obtener datos del fetch
+ * useFetch = usar fetch
+ * filterBySearch = filtrar por búsqueda
+ * useFilter = usar filtro
+ * progressReports = reportes de progreso
+ * setProgressReports = establecer reportes de progreso
+ * selectedProgress = progreso seleccionado
+ * setSelectedProgress = establecer progreso seleccionado
+ * searchTerm = término de búsqueda
+ * setSearchTerm = establecer término de búsqueda
+ * fetchProgressReports = obtener reportes de progreso
+ * data = datos
+ * progress_reports = reportes de progreso
+ * error = error
+ * filteredReports = reportes filtrados
+ * progress = progreso
+ * idx = índice
+ * _id = identificador
+ * title = título
+ * status = estado
+ * created_at = creado en
+ * toLocaleDateString = a fecha local en cadena
+ * e = evento
+ * description = descripción
+ * task = tarea
+ * crew = equipo
+ * name = nombre
+ * location = ubicación
+ * lat = latitud
+ * lng = longitud
+ * toFixed = fijar decimales
+ * updated_at = actualizado en
+ * toLocaleString = a cadena local
+ */

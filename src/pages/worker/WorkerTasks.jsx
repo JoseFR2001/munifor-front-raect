@@ -1,17 +1,37 @@
+//* ========================================
+//* PÁGINA: WorkerTasks
+//* ========================================
+//* Propósito: Lista de tareas asignadas al equipo del trabajador
+//* Ruta: /worker/tasks
+//* Layout: WorkerLayout
+//* Características:
+//*   - Columna izquierda: Tarea actual + Tareas futuras
+//*   - Columna derecha: Detalles de la tarea seleccionada
+//*   - Endpoint: /task/worker (tareas del equipo del trabajador)
+//*   - Solo el líder puede aceptar tareas (botón visible)
+//*   - Tarea "En Progreso" se muestra como tarea actual
+//*   - Click en tarea: muestra detalles en panel derecho
+
 import { useContext, useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import { UserContext } from "../../context/UserContext";
 
 const WorkerTasks = () => {
+  //* ========================================
+  //* CONTEXTO Y ESTADO
+  //* ========================================
   const { getFetchData, putFetch } = useFetch();
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [leaderCrew, setLeaderCrew] = useState(null);
   const { user } = useContext(UserContext);
 
-  // Refactor: extraer fetchTasks para poder reutilizarlo
+  //* ========================================
+  //* FUNCIÓN: Refetch tareas (reutilizable)
+  //* ========================================
   const fetchTasks = async () => {
     try {
+      //! Endpoint que trae las tareas del equipo del trabajador
       const data = await getFetchData("/task/worker");
       setTasks(data.tasks);
       setLeaderCrew(data.crew.leader);
@@ -20,6 +40,9 @@ const WorkerTasks = () => {
     }
   };
 
+  //* ========================================
+  //* EFECTO: Cargar tareas al montar
+  //* ========================================
   useEffect(() => {
     let isMounted = true;
 
@@ -46,22 +69,36 @@ const WorkerTasks = () => {
 
   console.log(leaderCrew);
 
+  //* ========================================
+  //* HANDLER: Aceptar tarea (solo líder)
+  //* ========================================
   const handleAcceptTask = async (id) => {
     console.log("Tarea aceptada:", id);
+    //! Endpoint para asignar tarea al equipo (cambiar status a "En Progreso")
     await putFetch("/task/assign", id);
-    // Volver a pedir los datos para refrescar la vista
+    //? Volver a pedir los datos para refrescar la vista
     fetchTasks();
     setSelectedTask(null);
   };
 
-  // Separar tarea actual (En Progreso) y futuras
+  //* ========================================
+  //* SEPARAR TAREAS
+  //* ========================================
+  //! Tarea actual: la que está "En Progreso"
   const currentTask = tasks.find((t) => t.status === "En Progreso") || null;
+  //? Tareas futuras: todas las demás (excepto la actual)
   const futureTasks = tasks.filter((t) => t._id !== currentTask?._id);
 
+  //* ========================================
+  //* RENDER
+  //* ========================================
   return (
     <div className="min-h-screen bg-gray-50 max-w-5xl mx-auto w-full py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-      {/* Tarea actual */}
+      {/* //? ======================================== */}
+      {/* //? COLUMNA IZQUIERDA: LISTA DE TAREAS */}
+      {/* //? ======================================== */}
       <div className="flex flex-col gap-6">
+        {/* //? Sección 1: Tarea actual */}
         <h2 className="text-xl font-bold text-gray-700 mb-4">Tarea actual</h2>
         {!currentTask ? (
           <div className="flex flex-col items-center justify-center py-8">
@@ -86,7 +123,8 @@ const WorkerTasks = () => {
             </span>
           </div>
         )}
-        {/* Tareas futuras */}
+
+        {/* //? Sección 2: Tareas futuras */}
         <h2 className="text-xl font-bold text-gray-700 mb-4">Tareas futuras</h2>
         {futureTasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8">
@@ -113,7 +151,10 @@ const WorkerTasks = () => {
           ))
         )}
       </div>
-      {/* Sección 2: detalles de la tarea seleccionada */}
+
+      {/* //? ======================================== */}
+      {/* //? COLUMNA DERECHA: DETALLES DE LA TAREA */}
+      {/* //? ======================================== */}
       <div>
         <h2 className="text-xl font-bold text-gray-700 mb-4">
           Detalle de la tarea
@@ -130,6 +171,8 @@ const WorkerTasks = () => {
               {selectedTask.title}
             </h3>
             <p className="text-gray-600 mb-2">{selectedTask.description}</p>
+
+            {/* //? Estado de la tarea */}
             <div className="mb-2">
               <span className="font-semibold text-gray-700">Estado:</span>
               <span
@@ -144,18 +187,24 @@ const WorkerTasks = () => {
                 {selectedTask.status}
               </span>
             </div>
+
+            {/* //? Prioridad de la tarea */}
             <div className="mb-2">
               <span className="font-semibold text-gray-700">Prioridad:</span>
               <span className="ml-2 text-gray-600">
                 {selectedTask.priority}
               </span>
             </div>
+
+            {/* //? ID de la tarea */}
             <div className="mb-2">
               <span className="font-semibold text-gray-700">ID:</span>
               <span className="ml-2 text-gray-700 font-mono">
                 {selectedTask._id}
               </span>
             </div>
+
+            {/* //! Botón "Aceptar tarea" (solo visible para el líder y si no hay tarea actual) */}
             {leaderCrew?.toString() === user._id?.toString() && !currentTask ? (
               <div className="mb-2">
                 <button
@@ -174,3 +223,41 @@ const WorkerTasks = () => {
 };
 
 export default WorkerTasks;
+
+//* ========================================
+//* CONSTANTES EN ESPAÑOL
+//* ========================================
+/*
+ * WorkerTasks = tareas de trabajador
+ * getFetchData = obtener datos del fetch
+ * putFetch = PUT fetch
+ * useFetch = usar fetch
+ * tasks = tareas
+ * setTasks = establecer tareas
+ * selectedTask = tarea seleccionada
+ * setSelectedTask = establecer tarea seleccionada
+ * leaderCrew = líder del equipo
+ * setLeaderCrew = establecer líder del equipo
+ * user = usuario
+ * UserContext = contexto de usuario
+ * fetchTasks = obtener tareas
+ * data = datos
+ * crew = equipo
+ * leader = líder
+ * error = error
+ * isMounted = está montado
+ * loadTasks = cargar tareas
+ * handleAcceptTask = manejar aceptar tarea
+ * id = identificador
+ * currentTask = tarea actual
+ * futureTasks = tareas futuras
+ * t = tarea (abreviatura)
+ * status = estado
+ * _id = identificador
+ * task = tarea
+ * idx = índice
+ * title = título
+ * description = descripción
+ * priority = prioridad
+ * toString = a cadena
+ */

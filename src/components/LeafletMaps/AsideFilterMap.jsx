@@ -1,47 +1,78 @@
+//* ========================================
+//* COMPONENTE: AsideFilterMap
+//* ========================================
+//* Propósito: Formulario de filtros para el mapa global
+//* Usado en: GlobalLeafletMap (panel izquierdo con filtros)
+//* Props:
+//*   - onFilters: función - Callback que recibe los filtros aplicados
+//* Campos del formulario:
+//*   - dataType: "report" | "task" | "progress" (obligatorio)
+//*   - Según dataType, muestra diferentes campos:
+//*     * report: type (Bache, Alumbrado, Basura, Otro), status (Pendiente, Revisado, Aceptado, Completado, Rechazado)
+//*     * task: type (Reparación, Mantenimiento, Recolección, Supervisión), priority (Alta, Media, Baja), status
+//*     * progress: progressStatus (pendiente, en-progreso, finalizado)
+//*   - timeRange: Rango de tiempo (1h, 6h, 12h, 24h, 7d, 1m, 3m, 6m, 1y, all)
+//* Lógica:
+//*   - Usa watch de react-hook-form para mostrar/ocultar campos según dataType
+//*   - Normaliza datos antes de enviar al callback (compatible con filterForMap)
+
 import { useForm } from "react-hook-form";
 
 const AsideFilterMap = ({ onFilters }) => {
   const { register, handleSubmit, watch } = useForm();
 
-  // Opción A: usar watch para leer dataType desde react-hook-form (sin estado local)
+  //* ========================================
+  //* WATCH: Observar dataType para mostrar campos condicionales
+  //* ========================================
   const dataType = watch("dataType");
 
+  //* ========================================
+  //* SUBMIT: Normalizar filtros y enviar al padre
+  //* ========================================
   const onSubmit = (data) => {
-    // Normalizar a la forma que espera filterForMap: { dataType, status, type, priority, timeRange }
+    //? Crear objeto de filtros vacío
     const filters = {};
     if (data.dataType) filters.dataType = data.dataType;
 
+    //! Normalizar campos según dataType
     switch (data.dataType) {
       case "report":
+        //? Filtros de reportes: type y status
         if (data.type) filters.type = data.type;
         if (data.status) filters.status = data.status;
         break;
       case "task":
+        //? Filtros de tareas: type, priority y status
         if (data.type) filters.type = data.type;
         if (data.priority) filters.priority = data.priority;
         if (data.status) filters.status = data.status;
         break;
       case "progress":
-        // en el formulario usamos `progressStatus` para el select de progreso
+        //? Filtros de avances: progressStatus → status
         if (data.progressStatus) filters.status = data.progressStatus;
         break;
       default:
         break;
     }
 
+    //* Agregar rango de tiempo si existe
     if (data.timeRange) filters.timeRange = data.timeRange;
 
-    // Llamar al callback del padre si existe, sino hacer un console.log para debug
+    //! Llamar callback del padre con filtros normalizados
     if (typeof onFilters === "function") {
       onFilters(filters);
     } else {
       console.log("filters:", filters);
     }
   };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <h2>Filtros del Mapa</h2>
-      {/* Aquí van los filtros del mapa */}
+
+      {/* //? ======================================== */}
+      {/* //? CAMPO PRINCIPAL: Tipo de Dato */}
+      {/* //? ======================================== */}
       <div>
         <label htmlFor="dataType">Tipo de Dato:</label>
         <select id="dataType" {...register("dataType")}>
@@ -51,6 +82,11 @@ const AsideFilterMap = ({ onFilters }) => {
           <option value="progress">Avance del trabajador</option>
         </select>
 
+        {/* //! ======================================== */}
+        {/* //! CAMPOS CONDICIONALES SEGÚN dataType */}
+        {/* //! ======================================== */}
+
+        {/* //? CASO 1: dataType = "report" */}
         {dataType === "report" && (
           <div>
             <label htmlFor="type">Tipo de Reporte:</label>
@@ -73,10 +109,10 @@ const AsideFilterMap = ({ onFilters }) => {
           </div>
         )}
 
+        {/* //? CASO 2: dataType = "task" */}
         {dataType === "task" && (
           <div>
             <label htmlFor="type">Tipo de Tarea:</label>
-            {/*Tengo que corregir esto */}
             <select id="type" {...register("type")}>
               <option value="">Seleccione un tipo de tarea</option>
               <option value="Reparación">Reparación</option>
@@ -100,9 +136,12 @@ const AsideFilterMap = ({ onFilters }) => {
             </select>
           </div>
         )}
+
+        {/* //? CASO 3: dataType = "progress" */}
         {dataType === "progress" && (
           <div>
             <label htmlFor="status">Avances del Trabajador:</label>
+            {/* //! Nota: usa progressStatus en el form, se mapea a status en onSubmit */}
             <select id="status" {...register("progressStatus")}>
               <option value="">Seleccione un avance</option>
               <option value="pendiente">Pendiente</option>
@@ -112,6 +151,9 @@ const AsideFilterMap = ({ onFilters }) => {
           </div>
         )}
 
+        {/* //? ======================================== */}
+        {/* //? CAMPO GENERAL: Rango de Tiempo */}
+        {/* //? ======================================== */}
         <label htmlFor="timeRange">Tiempo:</label>
         <select id="timeRange" {...register("timeRange")}>
           <option value="">Seleccione un rango de tiempo</option>
@@ -127,6 +169,8 @@ const AsideFilterMap = ({ onFilters }) => {
           <option value="all">Sin límite</option>
         </select>
       </div>
+
+      {/* //? Botón de submit */}
       <div>
         <button type="submit">Aplicar Filtros</button>
       </div>
@@ -135,3 +179,22 @@ const AsideFilterMap = ({ onFilters }) => {
 };
 
 export default AsideFilterMap;
+
+//* ========================================
+//* CONSTANTES EN ESPAÑOL
+//* ========================================
+/*
+ * AsideFilterMap = panel lateral de filtros de mapa
+ * onFilters = al aplicar filtros
+ * register = registrar (campo del formulario)
+ * handleSubmit = manejar envío
+ * watch = observar (valor del campo)
+ * dataType = tipo de dato
+ * data = datos
+ * filters = filtros
+ * type = tipo
+ * status = estado
+ * priority = prioridad
+ * progressStatus = estado de avance
+ * timeRange = rango de tiempo
+ */
