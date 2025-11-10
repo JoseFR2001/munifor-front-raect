@@ -1,20 +1,26 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CitizenLeafletMap from "../../components/LeafletMaps/CitizenLeafletMap";
+import ImageUploader from "../../components/ImageUploader";
 import reportSchema from "../../schemas/ReportSchema.js";
 import { useState } from "react";
 import useFetch from "../../hooks/useFetch.js";
 
 const CitizenReports = () => {
-  const { postFetch } = useFetch();
+  const { postFetchFormData } = useFetch();
   const { register, handleSubmit, formState, watch, reset } = useForm({
     resolver: zodResolver(reportSchema),
   });
   const { errors } = formState;
   const [markerPosition, setMarkerPosition] = useState(null);
+  const [selectedImages, setSelectedImages] = useState([]);
 
   const handleMarkerChange = (position) => {
     setMarkerPosition(position);
+  };
+
+  const handleImagesChange = (files) => {
+    setSelectedImages(files);
   };
 
   const onSubmit = (data) => {
@@ -24,8 +30,26 @@ const CitizenReports = () => {
     }
 
     const [lat, lng] = markerPosition;
-    postFetch("/report", { ...data, location: { lat, lng } });
+
+    // Construir FormData
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    formData.append("type_report", data.type_report);
+    if (data.other_type_detail) {
+      formData.append("other_type_detail", data.other_type_detail);
+    }
+    formData.append("location[lat]", lat);
+    formData.append("location[lng]", lng);
+
+    // Agregar imágenes
+    selectedImages.forEach((file) => {
+      formData.append("images", file);
+    });
+
+    postFetchFormData("/report", formData);
     reset();
+    setSelectedImages([]);
   };
 
   return (
@@ -93,17 +117,11 @@ const CitizenReports = () => {
         )}
       </div>
       <div>
-        <label htmlFor="image">Imagen</label>
-        <input
-          type="file"
-          {...register("image")}
-          id="image"
-          className="border"
-          accept="image/*"
+        <ImageUploader
+          onFilesChange={handleImagesChange}
+          maxFiles={5}
+          maxSizeMB={15}
         />
-        {errors.image && (
-          <p className="text-red-500 text-sm mt-1">{errors.image.message}</p>
-        )}
       </div>
       <div>
         <CitizenLeafletMap onMarkerChange={handleMarkerChange} />

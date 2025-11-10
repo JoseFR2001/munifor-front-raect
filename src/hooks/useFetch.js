@@ -96,6 +96,33 @@ const useFetch = () => {
     }
   };
 
+  // POST FormData con token (para archivos/imágenes)
+  const postFetchFormData = async (url, formData) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.replace("/login");
+      return;
+    }
+    try {
+      const response = await fetch(`${hostPort}${url}`, {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${token}`,
+          // NO incluir Content-Type - el navegador lo configura automáticamente con boundary
+        },
+        body: formData,
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.msg || "Error de red o respuesta no válida");
+      }
+      return data;
+    } catch (error) {
+      console.error("Error al enviar datos:", error);
+      throw error;
+    }
+  };
+
   // PUT JSON con token
   const putFetch = async (url, id, payload) => {
     const token = localStorage.getItem("token");
@@ -207,6 +234,7 @@ const useFetch = () => {
     getFetchData,
     postFetch,
     postFetchLocalStorage,
+    postFetchFormData,
     putFetch,
     putFetchProfile,
     patchFetch,

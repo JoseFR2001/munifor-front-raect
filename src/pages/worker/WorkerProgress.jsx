@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import useFetch from "../../hooks/useFetch";
+import ImageUploader from "../../components/ImageUploader";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import MapClickHandler from "../../components/LeafletMaps/MapClick";
 import "leaflet/dist/leaflet.css";
 
 const WorkerProgress = () => {
-  const { getFetchData, postFetchLocalStorage } = useFetch();
+  const { getFetchData, postFetchFormData } = useFetch();
   const [currentTask, setCurrentTask] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(null);
   const [crew, setCrew] = useState(null);
+  const [selectedImages, setSelectedImages] = useState([]);
   const { register, handleSubmit, reset, formState } = useForm();
   const { errors } = formState;
 
@@ -41,27 +43,60 @@ const WorkerProgress = () => {
     };
   }, []);
 
+  const handleImagesChange = (files) => {
+    setSelectedImages(files);
+  };
+
   const onSubmit = async (data) => {
     if (!markerPosition) {
       alert("Por favor, marca tu ubicación en el mapa");
       return;
     }
 
+    // Confirmación especial si se marca como Finalizado
+    if (data.status === "Finalizado") {
+      const confirmacion = window.confirm(
+        "¿Estás seguro de marcar esta tarea como FINALIZADA? Esto completará automáticamente todos los reportes asociados."
+      );
+      if (!confirmacion) {
+        return;
+      }
+    }
+
     const [lat, lng] = markerPosition;
-    const payload = {
-      title: data.title,
-      description: data.description,
-      status: data.status,
-      task: currentTask._id,
-      crew: crew._id,
-      location: { lat, lng },
-    };
+
+    // Construir FormData
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    formData.append("status", data.status);
+    formData.append("task", currentTask._id);
+    formData.append("crew", crew._id);
+    formData.append("location[lat]", lat);
+    formData.append("location[lng]", lng);
+
+    // Agregar imágenes
+    selectedImages.forEach((file) => {
+      formData.append("images", file);
+    });
 
     try {
-      await postFetchLocalStorage("/progress", payload);
+      await postFetchFormData("/progress-report", formData);
       reset();
       setMarkerPosition(null);
-      alert("Avance registrado exitosamente");
+      setSelectedImages([]);
+
+      if (data.status === "Finalizado") {
+        alert(
+          "✅ Tarea finalizada exitosamente. Todos los reportes asociados han sido completados."
+        );
+        // Redirigir a tareas después de 2 segundos
+        setTimeout(() => {
+          window.location.href = "/worker/tasks";
+        }, 2000);
+      } else {
+        alert("Avance registrado exitosamente");
+      }
     } catch (error) {
       console.error("Error al registrar avance:", error);
       alert("Error al registrar el avance");
@@ -164,6 +199,14 @@ const WorkerProgress = () => {
                   {errors.status.message}
                 </p>
               )}
+            </div>
+
+            <div>
+              <ImageUploader
+                onFilesChange={handleImagesChange}
+                maxFiles={5}
+                maxSizeMB={15}
+              />
             </div>
 
             <div>
