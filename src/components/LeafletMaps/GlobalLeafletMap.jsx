@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import AsideFilterMap from "./AsideFilterMap";
 import ReportDetails from "../details/ReportDetails";
 
-const GlobalLeafletMap = () => {
+const GlobalLeafletMap = ({ role }) => {
   const [allData, setAllData] = useState({
     reports: [],
     tasks: [],
@@ -23,17 +23,42 @@ const GlobalLeafletMap = () => {
   const [selectedReport, setSelectedReport] = useState(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchData = async () => {
-      const data = await getFetchData("/map/data");
-      console.log(data.tasks);
-      setAllData({
-        reports: data.reports || [],
-        tasks: data.tasks || [],
-        progress: data.progress || [],
-      });
+      try {
+        // Usar endpoint específico según el rol
+        const endpoint =
+          role === "Operador" ? "/map/operator-data" : "/map/data";
+
+        const data = await getFetchData(endpoint);
+
+        if (isMounted) {
+          console.log(data.tasks);
+          setAllData({
+            reports: data.reports || [],
+            tasks: data.tasks || [],
+            progress: data.progress || [],
+          });
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error("Error al cargar datos del mapa:", error);
+          setAllData({
+            reports: [],
+            tasks: [],
+            progress: [],
+          });
+        }
+      }
     };
+
     fetchData();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [role]);
 
   const handleApplyFilters = (newFilters) => {
     setFilters(newFilters);
