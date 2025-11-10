@@ -15,17 +15,29 @@ const CitizenDashboard = () => {
   });
   const { getFetchData } = useFetch();
   const navigate = useNavigate();
+
   useEffect(() => {
+    let isMounted = true;
+
     const fetchCounts = async () => {
       try {
         const data = await getFetchData("/dashboard/citizens");
-        console.log(data);
-        if (data.ok) setCounts(data.counts);
+        if (isMounted) {
+          console.log(data);
+          if (data.ok) setCounts(data.counts);
+        }
       } catch (err) {
-        // Puedes mostrar un error si lo deseas
+        if (isMounted) {
+          console.error(err);
+        }
       }
     };
+
     fetchCounts();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
   return (

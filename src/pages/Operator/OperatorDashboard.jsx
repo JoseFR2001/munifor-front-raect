@@ -15,15 +15,26 @@ const OperatorDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchCounts = async () => {
       try {
         const data = await getFetchData("/dashboard/operators");
-        if (data.ok) setCounts(data.counts);
+        if (isMounted && data.ok) {
+          setCounts(data.counts);
+        }
       } catch (err) {
-        // Puedes mostrar un error si lo deseas
+        if (isMounted) {
+          console.error(err);
+        }
       }
     };
+
     fetchCounts();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (

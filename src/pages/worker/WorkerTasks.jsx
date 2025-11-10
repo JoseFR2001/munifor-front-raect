@@ -1,23 +1,58 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
+import { UserContext } from "../../context/UserContext";
 
 const WorkerTasks = () => {
-  const { getFetchData } = useFetch();
+  const { getFetchData, putFetch } = useFetch();
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [leaderCrew, setLeaderCrew] = useState(null);
+  const { user } = useContext(UserContext);
+
+  // Refactor: extraer fetchTasks para poder reutilizarlo
+  const fetchTasks = async () => {
+    try {
+      const data = await getFetchData("/task/worker");
+      setTasks(data.tasks);
+      setLeaderCrew(data.crew.leader);
+    } catch (error) {
+      setTasks([]);
+    }
+  };
 
   useEffect(() => {
-    const fetchTasks = async () => {
+    let isMounted = true;
+
+    const loadTasks = async () => {
       try {
-        const data = await getFetchData("/task/worker"); // Endpoint para tareas del trabajador
-        console.log(data);
-        setTasks(data.tasks);
+        const data = await getFetchData("/task/worker");
+        if (isMounted) {
+          setTasks(data.tasks);
+          setLeaderCrew(data.crew.leader);
+        }
       } catch (error) {
-        setTasks([]);
+        if (isMounted) {
+          setTasks([]);
+        }
       }
     };
-    fetchTasks();
+
+    loadTasks();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
+
+  console.log(leaderCrew);
+
+  const handleAcceptTask = async (id) => {
+    console.log("Tarea aceptada:", id);
+    await putFetch("/task/assign", id);
+    // Volver a pedir los datos para refrescar la vista
+    fetchTasks();
+    setSelectedTask(null);
+  };
 
   // Separar tarea actual (En Progreso) y futuras
   const currentTask = tasks.find((t) => t.status === "En Progreso") || null;
@@ -121,6 +156,16 @@ const WorkerTasks = () => {
                 {selectedTask._id}
               </span>
             </div>
+            {leaderCrew?.toString() === user._id?.toString() && !currentTask ? (
+              <div className="mb-2">
+                <button
+                  className="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+                  onClick={() => handleAcceptTask(selectedTask._id)}
+                >
+                  aceptar tarea
+                </button>
+              </div>
+            ) : null}
           </div>
         )}
       </div>

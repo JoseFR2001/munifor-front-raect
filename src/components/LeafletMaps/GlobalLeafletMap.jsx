@@ -62,96 +62,96 @@ const GlobalLeafletMap = () => {
             attribution='&copy; <a href="https://osm.org">OpenStreetMap</a> contributors'
           />
           {filters.dataType === "report"
-            ? filteredData.map((item) => (
-                <Marker
-                  key={item._id}
-                  position={[item.location.lat, item.location.lng]}
-                  icon={getIconReport(
-                    item.report_type?.toLowerCase() || "otros",
-                    item.status?.toLowerCase()
-                  )}
-                  eventHandlers={{
-                    click: () => handleSelectReport(item),
-                    mouseover: (e) => e.target.openPopup(),
-                    mouseout: (e) => e.target.closePopup(),
-                  }}
-                >
-                  {/* Debo controlar el contenido del Popup */}
-                  <Popup>
-                    <div>
-                      <b>{item.report_type?.toUpperCase()}</b>
-                      <br />
-                      <span>{item.title || item.description}</span>
-                      {item.status && (
-                        <>
-                          <br />
-                          <small className="text-gray-600">
-                            Estado: {item.status}
-                          </small>
-                        </>
-                      )}
-                    </div>
-                  </Popup>
-                </Marker>
-              ))
+            ? filteredData
+                .filter((item) => item.location?.lat && item.location?.lng)
+                .map((item) => (
+                  <Marker
+                    key={item._id}
+                    position={[item.location.lat, item.location.lng]}
+                    icon={getIconReport(
+                      item.report_type?.toLowerCase() || "otros",
+                      item.status?.toLowerCase()
+                    )}
+                    eventHandlers={{
+                      click: () => handleSelectReport(item),
+                      mouseover: (e) => e.target.openPopup(),
+                      mouseout: (e) => e.target.closePopup(),
+                    }}
+                  >
+                    <Popup>
+                      <div>
+                        <b>{item.report_type?.toUpperCase()}</b>
+                        <br />
+                        <span>{item.title || item.description}</span>
+                        {item.status && (
+                          <>
+                            <br />
+                            <small className="text-gray-600">
+                              Estado: {item.status}
+                            </small>
+                          </>
+                        )}
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))
             : filters.dataType === "task"
-            ? filteredData.map((item) => (
-                <Marker
-                  key={item._id}
-                  position={[
-                    item.report.location.lat,
-                    item.report.location.lng,
-                  ]}
-                  icon={getIconTask(
-                    item.task_type?.toLowerCase(),
-                    item.priority?.toLowerCase()
-                  )}
-                  eventHandlers={{
-                    click: () => handleSelectReport(item),
-                    mouseover: (e) => e.target.openPopup(),
-                    mouseout: (e) => e.target.closePopup(),
-                  }}
-                >
-                  {/* Debo controlar el contenido del Popup */}
-                  <Popup>
-                    <div>
-                      <b>{item.task_type?.toUpperCase()}</b>
-                      <br />
-                      <span>{item.title || item.description}</span>
-                      <br />
-                      <small className="text-gray-600">
-                        Estado: {item.status}
-                      </small>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))
+            ? filteredData
+                .filter((item) => item.location?.lat && item.location?.lng)
+                .map((item) => (
+                  <Marker
+                    key={item._id}
+                    position={[item.location.lat, item.location.lng]}
+                    icon={getIconTask(
+                      item.task_type?.toLowerCase(),
+                      item.priority?.toLowerCase()
+                    )}
+                    eventHandlers={{
+                      click: () => handleSelectReport(item),
+                      mouseover: (e) => e.target.openPopup(),
+                      mouseout: (e) => e.target.closePopup(),
+                    }}
+                  >
+                    <Popup>
+                      <div>
+                        <b>{item.task_type?.toUpperCase()}</b>
+                        <br />
+                        <span>{item.title || item.description}</span>
+                        <br />
+                        <small className="text-gray-600">
+                          Estado: {item.status}
+                        </small>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))
             : filters.dataType === "progress" &&
-              filteredData.map((item) => (
-                <Marker
-                  key={item._id}
-                  position={[item.location.lat, item.location.lng]}
-                  icon={getIconProgress(item.status?.toLowerCase())}
-                  eventHandlers={{
-                    click: () => handleSelectReport(item),
-                    mouseover: (e) => e.target.openPopup(),
-                    mouseout: (e) => e.target.closePopup(),
-                  }}
-                >
-                  {/* Debo controlar el contenido del Popup */}
-                  <Popup>
-                    <div>
-                      <b>PROGRESO</b>
-                      <br />
-                      <span>{item.worker?.name}</span>
-                      <br />
-                      <small className="text-gray-600">
-                        Estado: {item.status}
-                      </small>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
+              filteredData
+                .filter((item) => item.location?.lat && item.location?.lng)
+                .map((item) => (
+                  <Marker
+                    key={item._id}
+                    position={[item.location.lat, item.location.lng]}
+                    icon={getIconProgress(item.status?.toLowerCase())}
+                    eventHandlers={{
+                      click: () => handleSelectReport(item),
+                      mouseover: (e) => e.target.openPopup(),
+                      mouseout: (e) => e.target.closePopup(),
+                    }}
+                  >
+                    <Popup>
+                      <div>
+                        <b>PROGRESO</b>
+                        <br />
+                        <span>{item.worker?.name}</span>
+                        <br />
+                        <small className="text-gray-600">
+                          Estado: {item.status}
+                        </small>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
         </MapContainer>
 
         {/* PANEL DE DETALLES (ASIDE DERECHO) */}

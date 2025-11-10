@@ -16,7 +16,6 @@ import ReportStatus from "./pages/Citizen/ReportStatus";
 
 //Trabajador
 import WorkerDashboard from "./pages/Worker/WorkerDashboard";
-import WorkerHistory from "./pages/Worker/WorkerHistory";
 import WorkerProgress from "./pages/Worker/WorkerProgress";
 import WorkerTasks from "./pages/Worker/WorkerTasks";
 import WorkerTeam from "./pages/Worker/WorkerTeam";
@@ -87,7 +86,6 @@ const App = () => {
           {/* Trabajador */}
           <Route element={<WorkerLayout />}>
             <Route path="/worker/dashboard" element={<WorkerDashboard />} />
-            <Route path="/worker/history" element={<WorkerHistory />} />
             <Route path="/worker/progress" element={<WorkerProgress />} />
             <Route
               path="/worker/progress-history"

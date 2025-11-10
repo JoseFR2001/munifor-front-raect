@@ -14,17 +14,28 @@ const AdminDashboard = () => {
   });
   const navigate = useNavigate();
   const { getFetchData } = useFetch();
+
   useEffect(() => {
+    let isMounted = true;
+
     const fetchStats = async () => {
       try {
         const data = await getFetchData("/dashboard/admin");
-        setCount(data.counts);
+        if (isMounted) {
+          setCount(data.counts);
+        }
       } catch (error) {
-        console.error("Error fetching stats:", error);
+        if (isMounted) {
+          console.error("Error fetching stats:", error);
+        }
       }
     };
 
     fetchStats();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
