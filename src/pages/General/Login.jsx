@@ -1,3 +1,24 @@
+//* ========================================
+//* PÁGINA: Login
+//* ========================================
+//* Propósito: Formulario de inicio de sesión para todos los roles
+//* Características:
+//*   - Validación con Zod (loginSchema)
+//*   - React Hook Form para manejo de formulario
+//*   - Autenticación con JWT
+//*   - Redirección automática según rol del usuario
+//* Flujo:
+//*   1. Usuario ingresa username y password
+//*   2. Se valida con Zod schema
+//*   3. POST a /auth/login
+//*   4. Si es exitoso: guarda token, decodifica JWT, actualiza contexto
+//*   5. Redirige según rol: Admin, Operador, Trabajador, o Ciudadano
+//* Roles y rutas:
+//*   - Administrador → /admin/dashboard
+//*   - Operador → /operator/dashboard
+//*   - Trabajador → /worker/dashboard
+//*   - Ciudadano → /citizen/dashboard
+
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,90 +29,130 @@ import { jwtDecode } from "jwt-decode";
 import { UserContext } from "../../context/UserContext";
 
 const Login = () => {
-  const navigator = useNavigate();
-  const { postFetch } = useFetch();
-  const [backendError, setBackendError] = useState("");
-  const { setUser } = useContext(UserContext);
+  const navigator = useNavigate(); // Hook para redireccionar
+  const { postFetch } = useFetch(); // Hook para peticiones HTTP
+  const [backendError, setBackendError] = useState(""); // Errores del backend
+  const { setUser } = useContext(UserContext); // Actualizar usuario en contexto global
 
-  //Manejo del formulario
+  //* ========================================
+  //* REACT HOOK FORM: Configuración
+  //* ========================================
   const { register, handleSubmit, formState } = useForm({
-    resolver: zodResolver(loginSchema),
-    mode: "onChange",
+    resolver: zodResolver(loginSchema), // Validación con Zod
+    mode: "onChange", // Validar al cambiar cada campo
   });
 
-  //Manejo de errores
-  const { errors } = formState;
+  const { errors } = formState; // Extraer errores de validación
 
-  //Manejo de la información que se envia al servidor
+  // Add missing onSubmit handler for login form
   const onSubmit = async (data) => {
+    setBackendError("");
     try {
       const response = await postFetch("/auth/login", data);
-      if (response.ok) {
-        // Guarda solo el token en localStorage
+      if (response?.token) {
         localStorage.setItem("token", response.token);
-        // Decodifica el token y actualiza el contexto inmediatamente
         const decoded = jwtDecode(response.token);
-        setUser({ _id: decoded._id, role: decoded.role });
-        decoded.role === "Administrador"
-          ? navigator("/admin/dashboard")
-          : decoded.role === "Operador"
-          ? navigator("/operator/dashboard")
-          : decoded.role === "Trabajador"
-          ? navigator("/worker/dashboard")
-          : navigator("/citizen/dashboard");
+        setUser({ ...decoded, token: response.token });
+        // Redirige según rol
+        switch (decoded.role) {
+          case "Administrador":
+            navigator("/admin/dashboard");
+            break;
+          case "Operador":
+            navigator("/operator/dashboard");
+            break;
+          case "Trabajador":
+            navigator("/worker/dashboard");
+            break;
+          default:
+            navigator("/citizen/dashboard");
+        }
+      } else {
+        setBackendError(response?.msg || "Credenciales incorrectas");
       }
-    } catch (error) {
-      setBackendError(error.message);
+    } catch (err) {
+      setBackendError(err.message || "Error de conexión");
     }
   };
 
+  //* ========================================
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <h1>Inicia sesión</h1>
-      <div>
-        <label htmlFor="username">Username</label>
-        <input
-          type="text"
-          {...register("username")}
-          id="username"
-          className="border"
-        />
-        {errors.username && (
-          <span className="text-red-500 text-sm">
-            {errors.username.message}
-          </span>
+    <section className="flex items-center justify-center min-h-screen bg-[#eaf4fe] px-2">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="w-full max-w-lg bg-white/70 backdrop-blur-md rounded-2xl shadow-2xl p-10 flex flex-col gap-8 border border-cyan-300 border-t-4 border-cyan-500"
+      >
+        <h1 className="text-4xl font-extrabold text-cyan-700 mb-4 text-center tracking-tight drop-shadow">
+          Iniciar sesión
+        </h1>
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="username"
+            className="block text-base font-semibold text-cyan-700 mb-1"
+          >
+            Usuario
+          </label>
+          <input
+            type="text"
+            {...register("username")}
+            id="username"
+            className="w-full px-5 py-3 rounded-xl border border-cyan-200 shadow focus:outline-none focus:ring-2 focus:ring-cyan-400 bg-cyan-50 text-lg"
+          />
+          {errors.username && (
+            <span className="text-red-500 text-sm mt-1">
+              {errors.username.message}
+            </span>
+          )}
+        </div>
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="password"
+            className="block text-base font-semibold text-cyan-700 mb-1"
+          >
+            Contraseña
+          </label>
+          <input
+            type="password"
+            {...register("password")}
+            id="password"
+            className="w-full px-5 py-3 rounded-xl border border-cyan-200 shadow focus:outline-none focus:ring-2 focus:ring-cyan-400 bg-cyan-50 text-lg"
+          />
+          {errors.password && (
+            <span className="text-red-500 text-sm mt-1">
+              {errors.password.message}
+            </span>
+          )}
+        </div>
+        {backendError && (
+          <div className="text-red-500 text-base font-semibold mb-2 text-center">
+            {backendError}
+          </div>
         )}
-      </div>
-
-      <div>
-        <label htmlFor="password">Password</label>
-        <input
-          type="password"
-          {...register("password")}
-          id="password"
-          className="border"
-        />
-      </div>
-      {errors.password && (
-        <span className="text-red-500 text-sm">{errors.password.message}</span>
-      )}
-      {backendError && (
-        <div className="text-red-500 text-sm mb-2">{backendError}</div>
-      )}
-      <div>
-        <Link to="/forgotpassword">¿Olvidaste tu contraseña?</Link>
-      </div>
-
-      <div>
-        <button type="submit">Iniciar sesión</button>
-      </div>
-
-      <div>
-        <p>
-          No tienes una cuenta? <Link to="/register">Regístrate</Link>
-        </p>
-      </div>
-    </form>
+        <div className="flex flex-col sm:flex-row sm:justify-between items-center gap-3 mt-2">
+          <Link
+            to="/forgotpassword"
+            className="text-cyan-600 hover:underline text-base font-medium"
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
+          <button
+            type="submit"
+            className="bg-cyan-600 text-white font-bold py-3 px-8 rounded-xl shadow hover:bg-cyan-700 transition text-lg"
+          >
+            Iniciar sesión
+          </button>
+        </div>
+        <div className="text-center text-base mt-4">
+          ¿No tienes una cuenta?{" "}
+          <Link
+            to="/register"
+            className="text-cyan-600 hover:underline font-semibold"
+          >
+            Regístrate
+          </Link>
+        </div>
+      </form>
+    </section>
   );
 };
 

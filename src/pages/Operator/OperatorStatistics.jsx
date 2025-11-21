@@ -1,19 +1,40 @@
+//! ========================================
+//! OPERATOR STATISTICS - ESTADÍSTICAS Y GRÁFICOS DEL OPERADOR
+//! ========================================
+//* Propósito: Página con gráficos estadísticos sobre reportes para el operador
+//* Ruta: /operator/statistics
+//* Layout: OperatorLayout (con OperatorNavBar)
+//* Endpoint: GET /operator/statistics - Obtiene datos para 3 gráficos
+//* Características:
+//*   - Gráfico de línea: Reportes Aceptados vs Completados por mes
+//*   - Gráfico de línea: Tipos de reportes (Bache, Alumbrado, Basura, Otro) por mes
+//*   - Gráfico de dona: Distribución de reportes por estado
+
 import { useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import ChartDoughnut from "../../components/Chart/ChartDoughnut";
 import ChartLine from "../../components/Chart/ChartLine";
 
+//? ========================================
+//? COMPONENTE PRINCIPAL - OPERATORSTATISTICS
+//? ========================================
+//* Descripción: Renderiza 3 gráficos con estadísticas de reportes
+//* @returns {JSX.Element} - Página con gráficos de Chart.js
+//* Uso: Operadores visualizan análisis de reportes
 const OperatorStatistics = () => {
   const { getFetchData } = useFetch();
-  const [doughnutData, setDoughnutData] = useState(null);
-  const [lineReportsData, setLineReportsData] = useState(null);
-  const [lineTypesData, setLineTypesData] = useState(null);
+
+  //? Estados para datos de cada gráfico
+  const [doughnutData, setDoughnutData] = useState(null); //* Datos para gráfico de dona (estados de reportes)
+  const [lineReportsData, setLineReportsData] = useState(null); //* Datos para gráfico de línea (Aceptados vs Completados)
+  const [lineTypesData, setLineTypesData] = useState(null); //* Datos para gráfico de línea (Tipos de reportes)
 
   useEffect(() => {
     const fetchStatistics = async () => {
       try {
         const res = await getFetchData("/operator/statistics");
         const data = res.data;
+        console.log(data);
         setDoughnutData({
           labels: Object.keys(data.chartDoughnutData),
           datasets: [
@@ -80,21 +101,61 @@ const OperatorStatistics = () => {
       }
     };
     fetchStatistics();
-  }, [getFetchData]);
+  }, []); //* Se ejecuta al montar
 
   return (
-    <div className="min-h-screen w-full flex flex-row items-center justify-center gap-[2vw] flex-wrap bg-gray-300">
+    <div className="min-h-screen w-full flex flex-row items-center justify-center gap-[2vw] flex-wrap bg-gradient-to-br from-[#eaf4fe] to-[#d2e7fa]">
+      {/* ========================================
+          GRÁFICO 1: LÍNEA - ACEPTADOS VS COMPLETADOS
+          ======================================== 
+          * Muestra evolución mensual de reportes aceptados y completados
+      */}
       <div className="bg-gray-100 rounded-lg shadow-lg p-4 w-[92%] h-80 flex items-center justify-center">
-        <ChartLine data={lineReportsData} />
+        <div className="bg-white/80 border-2 border-cyan-300 rounded-2xl shadow-2xl w-full h-full flex items-center justify-center">
+          <ChartLine data={lineReportsData} />
+        </div>
       </div>
+
+      {/* ========================================
+          GRÁFICO 2: LÍNEA - TIPOS DE REPORTES
+          ======================================== 
+          * Muestra evolución mensual de cada tipo (Bache, Alumbrado, Basura, Otro)
+      */}
       <div className="bg-gray-100 rounded-lg shadow-lg p-4 w-[92%] h-80 flex items-center justify-center">
-        <ChartLine data={lineTypesData} />
+        <div className="bg-white/80 border-2 border-cyan-300 rounded-2xl shadow-2xl w-full h-full flex items-center justify-center">
+          <ChartLine data={lineTypesData} />
+        </div>
       </div>
+
+      {/* ========================================
+          GRÁFICO 3: DONA - DISTRIBUCIÓN POR ESTADO
+          ======================================== 
+          * Muestra porcentaje de reportes por estado
+      */}
       <div className="bg-gray-100 rounded-lg shadow-lg p-4 w-2/5 h-80 flex items-center justify-center">
-        <ChartDoughnut data={doughnutData} />
+        <div className="bg-white/80 border-2 border-cyan-300 rounded-2xl shadow-2xl w-full h-full flex items-center justify-center">
+          <ChartDoughnut data={doughnutData} />
+        </div>
       </div>
     </div>
   );
 };
 
 export default OperatorStatistics;
+
+//! ========================================
+//! TRADUCCIÓN DE CONSTANTES
+//! ========================================
+//* doughnutData - datos de gráfico de dona
+//* lineReportsData - datos de gráfico de línea (reportes)
+//* lineTypesData - datos de gráfico de línea (tipos)
+//* chartDoughnutData - datos de gráfico de dona
+//* chartLineReportsData - datos de gráfico de línea (reportes)
+//* chartLineReportTypesData - datos de gráfico de línea (tipos de reportes)
+//* months - meses
+//* Aceptado - Accepted
+//* Completado - Completed
+//* Bache - Pothole
+//* Alumbrado - Street Light
+//* Basura - Trash
+//* Otro - Other

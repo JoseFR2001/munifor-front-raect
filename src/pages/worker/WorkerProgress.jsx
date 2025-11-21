@@ -1,25 +1,61 @@
-import { useEffect, useState } from "react";
+//* ========================================
+//* PÁGINA: WorkerProgress
+//* ========================================
+//* Propósito: Formulario para trabajadores registren avances de tareas
+//* Características:
+//*   - Solo puede reportar progreso de tarea actualmente "En Progreso"
+//*   - Subida de imágenes (hasta 5, 15MB c/u)
+//*   - Selección de ubicación en mapa
+//*   - Estados: En Progreso, Finalizado
+//*   - Al marcar "Finalizado": completa automáticamente TODOS los reportes asociados
+//*   - Validación de ubicación obligatoria
+//* Campos:
+//*   - title: Título del avance
+//*   - description: Descripción del trabajo realizado
+//*   - status: Estado (En Progreso / Finalizado)
+//*   - location: { lat, lng }
+//*   - images: Array de archivos (opcional)
+//*   - task: ID de la tarea (automático)
+//*   - crew: ID de la cuadrilla (automático)
+
+import { useEffect, useState, useContext } from "react";
 import { useForm } from "react-hook-form";
 import useFetch from "../../hooks/useFetch";
+import { UserContext } from "../../context/UserContext";
+import ImageUploader from "../../components/ImageUploader";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import MapClickHandler from "../../components/LeafletMaps/MapClick";
 import "leaflet/dist/leaflet.css";
+import { useNavigate } from "react-router-dom";
 
 const WorkerProgress = () => {
-  const { getFetchData, postFetchLocalStorage } = useFetch();
-  const [currentTask, setCurrentTask] = useState(null);
-  const [markerPosition, setMarkerPosition] = useState(null);
-  const [crew, setCrew] = useState(null);
+  const { getFetchData, postFetchFormData } = useFetch();
+  // Obtener usuario logueado
+  const { user } = useContext(UserContext);
+
+  //* Estados locales
+  const [currentTask, setCurrentTask] = useState(null); // Tarea actual "En Progreso"
+  const [markerPosition, setMarkerPosition] = useState(null); // [lat, lng]
+  const [crew, setCrew] = useState(null); // Cuadrilla del trabajador
+  const [selectedImages, setSelectedImages] = useState([]); // Imágenes seleccionadas
+
   const { register, handleSubmit, reset, formState } = useForm();
   const { errors } = formState;
+  const navigate = useNavigate();
 
+  //* ========================================
+  //* USEEFFECT: Cargar tarea actual al montar componente
+  //* ========================================
+  //* Busca la tarea que está "En Progreso" del trabajador
   useEffect(() => {
     let isMounted = true;
 
     const fetchCurrentTask = async () => {
       try {
+        //* GET /task/worker retorna { tasks: [], crew: {} }
         const data = await getFetchData("/task/worker");
         if (isMounted) {
+          //? Buscar la primera tarea con status "En Progreso"
           const taskInProgress = data.tasks.find(
             (t) => t.status === "En Progreso"
           );
@@ -36,70 +72,143 @@ const WorkerProgress = () => {
 
     fetchCurrentTask();
 
+    //* Cleanup: Prevenir actualizaciones de estado en componente desmontado
     return () => {
       isMounted = false;
     };
   }, []);
 
+  //* Callback para recibir imágenes del ImageUploader
+  const handleImagesChange = (files) => {
+    setSelectedImages(files);
+  };
+
+  //* ========================================
+  //* FUNCIÓN: onSubmit
+  //* ========================================
+  //* Propósito: Enviar reporte de progreso al backend
   const onSubmit = async (data) => {
+    //! VALIDACIÓN: Verificar ubicación
     if (!markerPosition) {
       alert("Por favor, marca tu ubicación en el mapa");
       return;
     }
 
+    //! CONFIRMACIÓN ESPECIAL: Si se marca como "Finalizado"
+    //* Esto es crítico porque completa TODOS los reportes de la tarea
+    if (data.status === "Finalizado") {
+      const confirmacion = window.confirm(
+        "¿Estás seguro de marcar esta tarea como FINALIZADA? Esto completará automáticamente todos los reportes asociados."
+      );
+      if (!confirmacion) {
+        return; // Usuario canceló
+      }
+    }
+
     const [lat, lng] = markerPosition;
-    const payload = {
-      title: data.title,
-      description: data.description,
-      status: data.status,
-      task: currentTask._id,
-      crew: crew._id,
-      location: { lat, lng },
-    };
+
+    //* ========================================
+    //* CONSTRUIR FORMDATA
+    //* ========================================
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    formData.append("status", data.status);
+    formData.append("task", currentTask._id); // ID de la tarea
+    formData.append("crew", crew._id); // ID de la cuadrilla
+    formData.append("location[lat]", lat);
+    formData.append("location[lng]", lng);
+
+    //* Agregar imágenes
+    selectedImages.forEach((file) => {
+      formData.append("images", file);
+    });
 
     try {
-      await postFetchLocalStorage("/progress", payload);
+      //* Enviar reporte de progreso
+      await postFetchFormData("/progress-report", formData);
+
+      //* Resetear formulario y estados
       reset();
       setMarkerPosition(null);
-      alert("Avance registrado exitosamente");
+      setSelectedImages([]);
+
+      //? Mensajes y redirección según el estado
+      if (data.status === "Finalizado") {
+        alert(
+          "✅ Tarea finalizada exitosamente. Todos los reportes asociados han sido completados."
+        );
+        //* Redirigir a /worker/tasks después de 2 segundos
+        setTimeout(() => {
+          window.location.href = "/worker/tasks";
+        }, 2000);
+      } else {
+        alert("Avance registrado exitosamente");
+      }
     } catch (error) {
       console.error("Error al registrar avance:", error);
       alert("Error al registrar el avance");
     }
   };
 
+  // Solo mostrar el formulario si el usuario es líder de la cuadrilla
+  const isLeader =
+    crew &&
+    user &&
+    crew.leader &&
+    (crew.leader._id === user._id || crew.leader === user._id);
+
+  // Si no es líder, mostrar solo el mensaje y salir
+  if (!isLeader) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-100 max-w-4xl mx-auto w-full py-8 px-4 flex flex-col">
+        <h1 className="text-2xl md:text-3xl font-extrabold text-cyan-700 mb-8 tracking-tight drop-shadow text-center">
+          Registro de Avances
+        </h1>
+        <div className="flex flex-1 flex-col items-center justify-center min-h-[300px]">
+          <p className="text-cyan-700 text-lg md:text-xl mb-6 text-center font-semibold">
+            Solo el líder de la cuadrilla puede registrar avances de la tarea.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Si es líder, mostrar la lógica normal
   return (
-    <div className="min-h-screen bg-gray-50 max-w-4xl mx-auto w-full py-8 px-4">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-100 max-w-4xl mx-auto w-full py-8 px-4 flex flex-col">
+      <h1 className="text-2xl md:text-3xl font-extrabold text-cyan-700 mb-8 tracking-tight drop-shadow text-center">
         Registro de Avances
       </h1>
 
       {!currentTask ? (
-        <div className="flex flex-col items-center justify-center py-16">
-          <p className="text-gray-600 text-lg mb-4">
+        <div className="flex flex-1 flex-col items-center justify-center min-h-[300px]">
+          <p className="text-cyan-700 text-lg md:text-xl mb-6 text-center font-semibold">
             No tienes ninguna tarea en progreso
           </p>
           <button
-            onClick={() => (window.location.href = "/worker/tasks")}
-            className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition"
+            onClick={() => navigate("/worker/tasks")}
+            className="bg-cyan-600 text-white px-8 py-3 rounded-xl shadow-lg hover:bg-cyan-700 transition font-bold text-base md:text-lg"
           >
             Acepta una tarea
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="mb-6 p-4 bg-indigo-50 rounded-lg">
-            <h2 className="text-lg font-semibold text-indigo-700 mb-2">
+        <div className="bg-white rounded-xl shadow-md p-6 border border-cyan-200">
+          {/* ...existing code for the form... */}
+          <div className="mb-6 p-4 bg-cyan-50 rounded-lg">
+            <h2 className="text-lg font-semibold text-cyan-700 mb-2">
               Tarea actual: {currentTask.title}
             </h2>
             <p className="text-gray-600">{currentTask.description}</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* ...existing code for form fields, uploader, mapa, botones... */}
             <div>
               <label
                 htmlFor="title"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-cyan-700 mb-1"
               >
                 Título del avance
               </label>
@@ -107,7 +216,7 @@ const WorkerProgress = () => {
                 type="text"
                 id="title"
                 {...register("title", { required: "El título es obligatorio" })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full border border-cyan-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-500 bg-white shadow-sm text-gray-700"
                 placeholder="Ej: Reparación de bache en progreso"
               />
               {errors.title && (
@@ -120,7 +229,7 @@ const WorkerProgress = () => {
             <div>
               <label
                 htmlFor="description"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-cyan-700 mb-1"
               >
                 Descripción
               </label>
@@ -129,7 +238,7 @@ const WorkerProgress = () => {
                 {...register("description", {
                   required: "La descripción es obligatoria",
                 })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full border border-cyan-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-500 bg-white shadow-sm text-gray-700"
                 rows="4"
                 placeholder="Describe el avance realizado..."
               />
@@ -143,7 +252,7 @@ const WorkerProgress = () => {
             <div>
               <label
                 htmlFor="status"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-cyan-700 mb-1"
               >
                 Estado del avance
               </label>
@@ -152,7 +261,7 @@ const WorkerProgress = () => {
                 {...register("status", {
                   required: "El estado es obligatorio",
                 })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full border border-cyan-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-500 bg-white shadow-sm text-gray-700"
               >
                 <option value="">Selecciona un estado</option>
                 <option value="Pendiente">Pendiente</option>
@@ -167,12 +276,21 @@ const WorkerProgress = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <ImageUploader
+                onFilesChange={handleImagesChange}
+                maxFiles={5}
+                maxSizeMB={15}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-cyan-700 mb-2">
                 Ubicación actual
               </label>
-              <div className="w-full h-96 border rounded-lg overflow-hidden">
+              <div className="w-full h-96 border border-cyan-200 rounded-lg overflow-hidden">
+                {/* Mapa Leaflet: Centrado en Formosa capital */}
                 <MapContainer
-                  center={[-26.1849, -58.1756]}
+                  center={[-26.1849, -58.1756]} // Coordenadas de Formosa
                   zoom={15}
                   scrollWheelZoom={true}
                   className="w-full h-full"
@@ -181,7 +299,9 @@ const WorkerProgress = () => {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
+                  {/* MapClickHandler: Captura clicks en el mapa */}
                   <MapClickHandler onClickPosition={setMarkerPosition} />
+                  {/* Mostrar marcador si hay posición seleccionada */}
                   {markerPosition && (
                     <Marker position={markerPosition}>
                       <Popup>Ubicación seleccionada</Popup>
@@ -189,6 +309,7 @@ const WorkerProgress = () => {
                   )}
                 </MapContainer>
               </div>
+              {/* Mostrar coordenadas seleccionadas */}
               {markerPosition && (
                 <p className="text-sm text-gray-600 mt-2">
                   Coordenadas: {markerPosition[0].toFixed(4)},{" "}
@@ -197,6 +318,7 @@ const WorkerProgress = () => {
               )}
             </div>
 
+            {/* Botones de acción */}
             <div className="flex justify-end gap-4 pt-4">
               <button
                 type="button"
@@ -204,13 +326,13 @@ const WorkerProgress = () => {
                   reset();
                   setMarkerPosition(null);
                 }}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+                className="px-6 py-2 border border-cyan-300 rounded-lg text-cyan-700 hover:bg-cyan-50 transition"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                className="px-6 py-2 bg-cyan-600 text-white font-semibold rounded-lg shadow hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
               >
                 Registrar avance
               </button>
@@ -223,3 +345,42 @@ const WorkerProgress = () => {
 };
 
 export default WorkerProgress;
+
+//* ========================================
+//* CONSTANTES EN ESPAÑOL
+//* ========================================
+/*
+ * currentTask = tarea actual
+ * setCurrentTask = establecer tarea actual
+ * markerPosition = posición del marcador
+ * setMarkerPosition = establecer posición del marcador
+ * crew = cuadrilla
+ * setCrew = establecer cuadrilla
+ * selectedImages = imágenes seleccionadas
+ * setSelectedImages = establecer imágenes seleccionadas
+ * register = registrar
+ * handleSubmit = manejar envío
+ * reset = resetear
+ * formState = estado del formulario
+ * errors = errores
+ * getFetchData = obtener datos
+ * postFetchFormData = enviar datos con archivos
+ * isMounted = está montado
+ * fetchCurrentTask = obtener tarea actual
+ * tasks = tareas
+ * taskInProgress = tarea en progreso
+ * status = estado
+ * handleImagesChange = manejar cambio de imágenes
+ * files = archivos
+ * onSubmit = al enviar
+ * data = datos
+ * confirmacion = confirmación
+ * lat = latitud
+ * lng = longitud
+ * formData = datos del formulario
+ * title = título
+ * description = descripción
+ * task = tarea
+ * location = ubicación
+ * images = imágenes
+ */

@@ -1,57 +1,97 @@
+//! ========================================
+//! OPERATOR WORKER PROGRESS - AVANCES DE TRABAJADORES
+//! ========================================
+//* Propósito: Página para visualizar todos los avances/progresos reportados por trabajadores
+//* Ruta: /operator/worker-progress
+//* Layout: OperatorLayout (con OperatorNavBar)
+//* Endpoint: GET /progress-report - Obtiene todos los reportes de progreso
+//* Características:
+//*   - Lista de avances con título, trabajador, cuadrilla y estado
+//*   - Filtros por estado (Todos, Pendiente, En Progreso, Finalizado)
+//*   - Búsqueda por título de avance
+//*   - Modal de detalles con descripción, imágenes, información completa
+
 import { useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import useFilter from "../../hooks/useFilter";
+import ProgressWorkerDetail from "../../components/details/ProgressWorkerDetail";
 
+//? ========================================
+//? COMPONENTE PRINCIPAL - OPERATORWORKERPROGRESS
+//? ========================================
+//* Descripción: Muestra lista de avances con filtros y detalles
+//* @returns {JSX.Element} - Lista de avances con modal de detalles
+//* Uso: Operadores monitorean el progreso de tareas por parte de trabajadores
 const OperatorWorkerProgress = () => {
   const { getFetchData } = useFetch();
-  const [progressReports, setProgressReports] = useState([]);
-  const [selectedProgress, setSelectedProgress] = useState(null);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("Todos");
+
+  //? Estados para datos y selección
+  const [progressReports, setProgressReports] = useState([]); //* Lista de reportes de progreso
+  const [selectedProgress, setSelectedProgress] = useState(null); //* Progreso seleccionado para mostrar en modal
+
+  //? Estados para filtros y búsqueda
+  const [search, setSearch] = useState(""); //* Búsqueda por título
+  const [statusFilter, setStatusFilter] = useState("Todos"); //* Filtro por estado
 
   const { filterBySearch, filterProgressByStatus } = useFilter();
 
+  //? ========================================
+  //? EFFECT: CARGAR REPORTES DE PROGRESO
+  //? ========================================
+  //* Se ejecuta al montar el componente
   useEffect(() => {
     const fetchProgressReports = async () => {
       try {
+        //? Obtiene todos los reportes de progreso
         const data = await getFetchData("/progress-report");
-        setProgressReports(data.progressReports || []);
+        console.log(data);
+        setProgressReports(data.progress_reports || []);
       } catch (error) {
-        setProgressReports([]);
+        setProgressReports([]); //* Si hay error, muestra lista vacía
       }
     };
     fetchProgressReports();
-  }, []);
+  }, []); //* Solo al montar
 
+  //? ========================================
+  //? HANDLERS: ACCIONES DE PROGRESO
+  //? ========================================
+
+  //* Cierra el modal de detalles
   const closeModal = () => setSelectedProgress(null);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-cyan-100">
+      {/* ========================================
+          SECCIÓN: HEADER CON BÚSQUEDA Y FILTROS
+          ======================================== */}
       <div className="max-w-5xl mx-auto px-4 py-4 flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-700">
+          <h2 className="text-3xl font-extrabold text-cyan-700 mb-4 tracking-tight drop-shadow text-center w-full">
             Avances de Trabajadores
           </h2>
         </div>
 
+        {/* Input de búsqueda por título */}
         <div className="flex gap-2 items-center">
           <input
             type="text"
             placeholder="Buscar por título..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border rounded px-3 py-2 w-full max-w-md focus:outline-none focus:ring focus:border-blue-300"
+            className="border rounded-xl px-3 py-2 w-full max-w-md focus:outline-none focus:ring-2 focus:ring-cyan-300 bg-white/70 backdrop-blur-md shadow"
           />
         </div>
 
+        {/* Filtros por estado */}
         <div className="flex gap-2">
           {["Todos", "Pendiente", "En Progreso", "Finalizado"].map((opt) => (
             <button
               key={opt}
-              className={`px-3 py-1 rounded border font-medium transition-colors duration-150 ${
+              className={`px-3 py-1 rounded-xl border font-semibold transition-colors duration-150 ${
                 statusFilter === opt
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-blue-600 border-blue-600"
+                  ? "bg-blue-600 text-white" //* Estilo del filtro activo
+                  : "bg-white text-blue-600 border-blue-600" //* Estilo del filtro inactivo
               }`}
               onClick={() => setStatusFilter(opt)}
             >
@@ -60,17 +100,23 @@ const OperatorWorkerProgress = () => {
           ))}
         </div>
       </div>
+
+      {/* ========================================
+          SECCIÓN: LISTA DE AVANCES
+          ======================================== */}
       <div className="space-y-4">
-        {/** aplicar filtros por estado y búsqueda */}
+        {/** Aplicar filtros por estado y búsqueda encadenados */}
         {filterBySearch(
           filterProgressByStatus(progressReports, statusFilter),
           search,
           "title"
         ).length === 0 ? (
+          //* Mensaje cuando no hay avances
           <div className="flex flex-col items-center justify-center py-16">
             <h3>No hay avances registrados</h3>
           </div>
         ) : (
+          //* Lista de avances filtrados
           filterBySearch(
             filterProgressByStatus(progressReports, statusFilter),
             search,
@@ -78,22 +124,23 @@ const OperatorWorkerProgress = () => {
           ).map((progress, idx) => (
             <div
               key={idx}
-              className="bg-white rounded-lg shadow p-3 flex justify-between items-center border border-gray-200 w-full max-w-2xl mx-auto min-h-14 hover:cursor-pointer"
+              className="bg-white/70 backdrop-blur-md rounded-2xl shadow-lg p-3 flex justify-between items-center border border-cyan-200 w-full max-w-2xl mx-auto min-h-14 hover:scale-[1.02] hover:shadow-2xl transition-all hover:cursor-pointer"
               onClick={() => setSelectedProgress(progress)}
             >
               <div>
-                <span className="block text-xl font-semibold text-gray-800">
+                <span className="block text-xl font-semibold text-cyan-900">
                   {progress.title}
                 </span>
-                <span className="block text-sm text-gray-500">
-                  Trabajador: {progress.worker?.name || progress.worker}
+                <span className="block text-sm text-cyan-600">
+                  Trabajador: {progress.worker?.username || progress.worker}
                 </span>
-                <span className="block text-sm text-gray-500">
+                <span className="block text-sm text-cyan-600">
                   Equipo: {progress.crew?.name || progress.crew}
                 </span>
               </div>
+              {/* Badge de estado con color según el estado */}
               <span
-                className={`px-5 py-2 rounded-full text-base font-medium ${
+                className={`px-5 py-2 rounded-full text-base font-semibold ${
                   progress.status === "Finalizado"
                     ? "bg-green-100 text-green-700"
                     : progress.status === "En Progreso"
@@ -106,53 +153,29 @@ const OperatorWorkerProgress = () => {
             </div>
           ))
         )}
+
+        {/* ========================================
+            MODAL: DETALLES DEL AVANCE
+            ======================================== 
+            * Muestra título, descripción, trabajador, cuadrilla, estado
+            * Muestra imágenes del progreso si existen
+        */}
         {selectedProgress && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full">
-              <h3 className="text-lg font-semibold text-indigo-700 mb-2">
-                {selectedProgress.title}
-              </h3>
-              <p className="text-gray-600 mb-2">
-                {selectedProgress.description}
-              </p>
-              <div className="mb-2">
-                <span className="font-semibold text-gray-700">Trabajador:</span>
-                <span className="ml-2 text-gray-600">
-                  {selectedProgress.worker?.name || selectedProgress.worker}
-                </span>
-              </div>
-              <div className="mb-2">
-                <span className="font-semibold text-gray-700">Equipo:</span>
-                <span className="ml-2 text-gray-600">
-                  {selectedProgress.crew?.name || selectedProgress.crew}
-                </span>
-              </div>
-              <div className="mb-2">
-                <span className="font-semibold text-gray-700">Estado:</span>
-                <span className="ml-2 text-gray-600">
-                  {selectedProgress.status}
-                </span>
-              </div>
-              {selectedProgress.images &&
-                selectedProgress.images.length > 0 && (
-                  <div className="mb-2">
-                    <span className="font-semibold text-gray-700">
-                      Imágenes:
-                    </span>
-                    <div className="flex gap-2 mt-2">
-                      {selectedProgress.images.map((img, i) => (
-                        <img
-                          key={i}
-                          src={img}
-                          alt="avance"
-                          className="h-20 w-20 object-cover rounded"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50"
+            onClick={closeModal}
+          >
+            <div
+              className="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-cyan-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ProgressWorkerDetail
+                progress={selectedProgress}
+                onClose={closeModal}
+              />
+              {/* Botón cerrar */}
               <button
-                className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                className="mt-4 px-4 py-2 bg-cyan-600 text-white rounded-xl font-semibold hover:bg-cyan-700 w-full transition"
                 onClick={closeModal}
               >
                 Cerrar
@@ -166,3 +189,15 @@ const OperatorWorkerProgress = () => {
 };
 
 export default OperatorWorkerProgress;
+
+//! ========================================
+//! TRADUCCIÓN DE CONSTANTES
+//! ========================================
+//* progressReports - reportes de progreso
+//* selectedProgress - progreso seleccionado
+//* search - búsqueda
+//* statusFilter - filtro de estado
+//* closeModal - cerrar modal
+//* worker - trabajador
+//* crew - cuadrilla
+//* images - imágenes

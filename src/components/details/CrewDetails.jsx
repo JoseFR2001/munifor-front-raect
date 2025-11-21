@@ -1,32 +1,57 @@
+//* ========================================
+//* COMPONENTE: CrewDetails
+//* ========================================
+//* Propósito: Modal con detalles de una cuadrilla
+//* Usado en: Operator/Admin páginas de equipos
+//* Props:
+//*   - crew: objeto - Cuadrilla completa con name, leader, members, etc.
+//*   - onClose: función - Cerrar el modal
+//* Diseño: Modal centrado con scroll vertical
+
 const CrewDetails = ({ crew, onClose }) => {
   console.log(crew);
   return (
-    <section
-      className="absolute top-0 right-0 h-full max-w-md w-full bg-white shadow-2xl z-40 flex flex-col border-l border-gray-200"
-      style={{ position: "absolute" }}
-    >
-      <div className="p-6 border-b flex justify-between items-center">
-        <h2 className="text-xl font-bold">Detalles de la Cuadrilla</h2>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
-          ✕
-        </button>
-      </div>
-      <div className="p-6 flex-1 overflow-y-auto">
-        {/* Aquí van los detalles de la cuadrilla */}
+    <div className="flex flex-col w-full max-h-[70vh] overflow-y-auto">
+      {/* Header con título */}
+      <h2 className="text-2xl font-bold mb-4 text-center">
+        Detalles de la Cuadrilla
+      </h2>
+
+      {/* Contenido con detalles de la cuadrilla */}
+      <div className="flex flex-col gap-3">
         <p>
-          <span className="font-semibold">Nombre:</span> {crew?.name}
+          <span className="font-semibold">Nombre:</span>{" "}
+          {crew?.name || <span className="text-gray-400">Sin nombre</span>}
         </p>
         <p>
-          <span className="font-semibold">Líder:</span> {crew?.leader?.username}
+          <span className="font-semibold">Líder:</span>{" "}
+          {crew?.leader?.username || (
+            <span className="text-gray-400">Sin líder</span>
+          )}
         </p>
+        {/* Miembros: Lista separada por comas */}
         <p>
           <span className="font-semibold">Miembros:</span>{" "}
-          {crew?.members?.map((member) => member.username).join(", ")}
+          {crew?.members?.length > 0
+            ? crew.members.map((member) => member.username).join(", ")
+            : "Sin miembros"}
         </p>
-        {/* Puedes agregar más campos aquí */}
       </div>
-    </section>
+    </div>
   );
 };
 
 export default CrewDetails;
+
+//* ========================================
+//* CONSTANTES EN ESPAÑOL
+//* ========================================
+/*
+ * CrewDetails = detalles de cuadrilla
+ * crew = cuadrilla / equipo
+ * onClose = al cerrar
+ * name = nombre
+ * leader = líder / jefe
+ * members = miembros
+ * username = nombre de usuario
+ */
