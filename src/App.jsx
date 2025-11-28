@@ -26,7 +26,7 @@ import Home from "./pages/General/Home";
 import CitizenRegister from "./pages/General/CitizenRegister";
 import Login from "./pages/General/Login";
 import ForgotPassword from "./pages/General/ForgotPassword";
-import FAQ from "./pages/General/Faq";
+import FAQ from "./pages/General/FAQ";
 import UpdatePassword from "./pages/General/UpdatePassword";
 
 //* ========================================
